@@ -16,7 +16,7 @@ export type ScrollAnimationConfig = {
 };
 
 export type ScrollAnimationResult<T extends HTMLElement = HTMLElement> = {
-  ref: React.RefObject<T>;
+  ref: React.RefObject<T | null>;
   opacity: MotionValue<number>;
   y: MotionValue<number>;
 };
