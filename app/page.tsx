@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { ArrowUpRight } from 'lucide-react';
-import { motion, type Variants, useAnimationControls, useInView } from 'framer-motion';
+import React, { useState, useCallback, useEffect } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import Hero from '@/components/hero';
 import ContactSection from '@/components/contact-section';
@@ -20,6 +19,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
+import { useScrollAnimation } from '@/lib/hooks/use-scroll-animation';
 
 type FeaturedSectionProps = {
   id: string;
@@ -35,7 +35,6 @@ const MotionTitle = motion.create('h2');
 const MotionDescription = motion.create('p');
 const MotionHighlightsShell = motion.create('div');
 const MotionDividerShell = motion.create('div');
-const MotionLinkShell = motion.create('div');
 const MotionSection = motion.create('section');
 const MotionGrid = motion.create('div');
 
@@ -47,47 +46,10 @@ const MORE_DIVIDER_DELAY = 0.1;
 const COMPACT_BASE_DELAY_OFFSET = MORE_DIVIDER_DELAY;
 const COMPACT_ITEM_STAGGER = 0.08;
 const COLLAPSED_ITEM_STAGGER = 0.1;
-const HEADER_CHILD_STAGGER = 0.08;
 
 // Reset the stagger every few cards so carousel slides stay snappy.
 const getCardStaggerDelay = (index: number) =>
   (index % CARD_STAGGER_GROUP) * CARD_STAGGER_DELAY;
-
-const headerVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: (delay: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: 'easeOut', delay },
-  }),
-};
-
-const headerChildVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: (delay: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: 'easeOut', delay },
-  }),
-};
-
-const dividerVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: (delay: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: 'easeOut', delay },
-  }),
-};
-
-const linkVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: (delay: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: 'easeOut', delay },
-  }),
-};
 
 const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay: number }> = ({
   id,
@@ -98,71 +60,34 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
   isReady,
   delay,
 }) => {
-  const headerRef = useRef<HTMLDivElement | null>(null);
-  const highlightsRef = useRef<HTMLDivElement | null>(null);
-  const moreSectionRef = useRef<HTMLDivElement | null>(null);
-
-  const isHeaderInView = useInView(headerRef, { once: true, amount: 0.7 });
-  const isHighlightsInView = useInView(highlightsRef, { once: true, amount: 0.15 });
-  const isMoreSectionInView = useInView(moreSectionRef, { once: true, amount: 0.3 });
-
-  const shouldAnimateHeader = isReady && isHeaderInView;
-  const shouldAnimateHighlights = isReady && isHighlightsInView;
-  const shouldAnimateMore = isReady && isMoreSectionInView;
+  const prefersReducedMotion = useReducedMotion();
+  const headerScrollAnimation = useScrollAnimation({ offsetStart: 0.8, offsetEnd: 0.3 });
+  const highlightsScrollAnimation = useScrollAnimation({ offsetStart: 0.85, offsetEnd: 0.25 });
+  const dividerScrollAnimation = useScrollAnimation({ offsetStart: 0.9, offsetEnd: 0.35 });
 
   // Separate featured and non-featured items
   const featuredItems = items.filter(item => item.featured);
   const nonFeaturedItems = items.filter(item => !item.featured);
   
   const shouldPeekNextCard = featuredItems.length >= 3;
-  const headerControls = useAnimationControls();
-  const linkControls = useAnimationControls();
-  const highlightsControls = useAnimationControls();
-  const dividerControls = useAnimationControls();
-  const hasStartedHeaderRef = useRef(false);
-  const hasStartedHighlightsRef = useRef(false);
-  const hasTriggeredDividerRef = useRef(false);
   const [cardsActive, setCardsActive] = useState(false);
   const [moreItemsActive, setMoreItemsActive] = useState(false);
   
   useEffect(() => {
-    if (!shouldAnimateHeader || hasStartedHeaderRef.current) {
-      return;
+    if (isReady) {
+      const startDelayMs = Math.max(0, (delay + CARD_OVERLAP_DELAY) * 1000);
+      const timer = window.setTimeout(() => setCardsActive(true), startDelayMs);
+      return () => {
+        window.clearTimeout(timer);
+      };
     }
-
-    hasStartedHeaderRef.current = true;
-
-    void headerControls.start('visible');
-    void linkControls.start('visible');
-  }, [shouldAnimateHeader, headerControls, linkControls]);
+  }, [isReady, delay]);
 
   useEffect(() => {
-    if (!shouldAnimateHighlights || hasStartedHighlightsRef.current) {
-      return;
+    if (isReady) {
+      setMoreItemsActive(true);
     }
-
-    hasStartedHighlightsRef.current = true;
-
-    void highlightsControls.start('visible');
-
-    const startDelayMs = Math.max(0, (delay + CARD_OVERLAP_DELAY) * 1000);
-    const timer = window.setTimeout(() => setCardsActive(true), startDelayMs);
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [shouldAnimateHighlights, highlightsControls, delay]);
-
-  useEffect(() => {
-    if (!shouldAnimateMore || hasTriggeredDividerRef.current) {
-      return;
-    }
-
-    hasTriggeredDividerRef.current = true;
-    void dividerControls.start('visible');
-
-    setMoreItemsActive(true);
-  }, [shouldAnimateMore, dividerControls]);
+  }, [isReady]);
 
   const carouselViewportClass = 'px-4 sm:px-6 lg:px-8';
   const carouselContentClass = cn(
@@ -181,51 +106,44 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
       id={id}
       className="space-y-5"
     >
-      <div
-        ref={headerRef}
+      <MotionHeaderShell
+        ref={headerScrollAnimation.ref}
+        style={{
+          opacity: prefersReducedMotion ? 1 : headerScrollAnimation.opacity,
+          y: prefersReducedMotion ? 0 : headerScrollAnimation.y,
+        }}
         className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
       >
-        <MotionHeaderShell
-          variants={headerVariants}
-          initial="hidden"
-          animate={headerControls}
-          custom={delay}
-          className="flex items-center gap-3 sm:gap-6 opacity-0"
-        >
+        <div className="flex items-center gap-3 sm:gap-6">
           <MotionAccent
-            variants={headerChildVariants}
-            custom={delay}
             className={`inline-flex pl-2 h-12 w-2 rounded-full ${accentClass}`}
           />
           <div>
             <MotionTitle
-              variants={headerChildVariants}
-              custom={delay + HEADER_CHILD_STAGGER}
               className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl pt-4"
             >
               {title}
             </MotionTitle>
             <MotionDescription
-              variants={headerChildVariants}
-              custom={delay + HEADER_CHILD_STAGGER * 2}
               className="max-w-xl text-base text-muted-foreground sm:text-lg"
             >
               {description}
             </MotionDescription>
           </div>
-        </MotionHeaderShell>
-      </div>
+        </div>
+      </MotionHeaderShell>
       
       {/* Featured items in full card format */}
       {featuredItems.length > 0 && (
-        <div ref={highlightsRef} className="space-y-5">
+        <div className="space-y-5">
           {/* Animated highlights indicator */}
           <MotionHighlightsShell
-            variants={headerVariants}
-            initial="hidden"
-            animate={highlightsControls}
-            custom={delay + 0.1}
-            className="flex items-center justify-center gap-3 opacity-0"
+            ref={highlightsScrollAnimation.ref}
+            style={{
+              opacity: prefersReducedMotion ? 1 : highlightsScrollAnimation.opacity,
+              y: prefersReducedMotion ? 0 : highlightsScrollAnimation.y,
+            }}
+            className="flex items-center justify-center gap-3"
           >
             <div className="h-px flex-1 bg-border" />
             <div className="flex items-center gap-2">
@@ -287,14 +205,15 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
       
       {/* Non-featured items in compact format with collapsibility */}
       {nonFeaturedItems.length > 0 && (
-        <div ref={moreSectionRef} className="space-y-3">
+        <div className="space-y-3">
           {featuredItems.length > 0 && (
             <MotionDividerShell
-              variants={dividerVariants}
-              initial="hidden"
-              animate={dividerControls}
-              custom={delay + MORE_DIVIDER_DELAY}
-              className="flex items-center justify-center gap-3 pt-2 opacity-0"
+              ref={dividerScrollAnimation.ref}
+              style={{
+                opacity: prefersReducedMotion ? 1 : dividerScrollAnimation.opacity,
+                y: prefersReducedMotion ? 0 : dividerScrollAnimation.y,
+              }}
+              className="flex items-center justify-center gap-3 pt-2"
             >
               <div className="h-px flex-1 bg-border" />
               <span className="px-2 text-sm font-medium text-muted-foreground">
@@ -405,7 +324,7 @@ const PersonalSite = () => {
           />
         </main>
         
-        <ContactSection isReady={heroReady} />
+        <ContactSection />
       </div>
     </div>
   );

@@ -4,36 +4,10 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub, faLinkedinIn, faOrcid } from '@fortawesome/free-brands-svg-icons';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import { motion, type Variants } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useScrollAnimation } from '@/lib/hooks/use-scroll-animation';
 
 const MotionContactSection = motion.create('section');
-const MotionContactContent = motion.create('div');
-const MotionContactLink = motion.create('a');
-
-const contentVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    transition: { duration: 0.2, ease: 'easeOut' },
-  },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.45,
-      ease: 'easeOut',
-      delay: 0.4,
-      delayChildren: 0.2,
-      staggerChildren: 0.12,
-    },
-  },
-};
-
-const linkVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.3, ease: 'easeOut' },
-  },
-};
 
 const SOCIAL_LINKS = [
   { href: 'mailto:timo.diepers@rwth-aachen.de', label: 'Mail', icon: faEnvelope },
@@ -42,17 +16,18 @@ const SOCIAL_LINKS = [
   { href: 'https://orcid.org/0009-0002-8566-8618', label: 'ORCID', icon: faOrcid },
 ];
 
-type ContactSectionProps = {
-  isReady?: boolean;
-};
-
-const ContactSection: React.FC<ContactSectionProps> = ({ isReady = false }) => {
+const ContactSection: React.FC = () => {
+  const prefersReducedMotion = useReducedMotion();
+  const scrollAnimation = useScrollAnimation({ offsetStart: 0.9, offsetEnd: 0.4 });
+  
   return (
     <MotionContactSection
       id="contact"
-      initial={{ opacity: 0, y: 20 }}
-      animate={isReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, ease: 'easeOut', delay: 0.2 }}
+      ref={scrollAnimation.ref}
+      style={{
+        opacity: prefersReducedMotion ? 1 : scrollAnimation.opacity,
+        y: prefersReducedMotion ? 0 : scrollAnimation.y,
+      }}
       className="text-foreground border-t border-border pt-12 my-12"
     >
       {/* Header */}
@@ -66,27 +41,21 @@ const ContactSection: React.FC<ContactSectionProps> = ({ isReady = false }) => {
           </p>
         </div>
       </div>
-      <MotionContactContent
-        initial="hidden"
-        animate={isReady ? 'visible' : 'hidden'}
-        variants={contentVariants}
-        className="flex flex-wrap gap-3"
-      >
+      <div className="flex flex-wrap gap-3">
         {SOCIAL_LINKS.map(({ href, label, icon }) => (
-          <MotionContactLink
+          <a
             key={`contact-${label}`}
             href={href}
             target={label === 'Mail' ? undefined : '_blank'}
             rel={label === 'Mail' ? undefined : 'noopener noreferrer'}
-            variants={linkVariants}
             className="inline-flex items-center gap-2 rounded-lg bg-card/50 px-3 py-2 text-sm font-medium text-foreground transition-all duration-300 hover:bg-card hover:text-primary"
             aria-label={label}
           >
             <FontAwesomeIcon icon={icon} className="text-base" />
             {label}
-          </MotionContactLink>
+          </a>
         ))}
-      </MotionContactContent>
+      </div>
     </MotionContactSection>
   );
 };

@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import type { ContentItem } from '@/lib/content';
 import { useTheme } from '@/components/theme-provider';
+import { useScrollAnimation } from '@/lib/hooks/use-scroll-animation';
 
 type ContentCardProps = {
   item: ContentItem;
@@ -25,6 +26,7 @@ const ContentCard = ({
   const shouldAnimate = !disableAnimation;
   const usesParentTrigger = shouldAnimate && typeof isActive === 'boolean';
   const { isDark, ready } = useTheme();
+  const scrollAnimation = useScrollAnimation();
 
   const imageSrc = useMemo(() => {
     const hasAnyImage = item.image || item.imageLight || item.imageDark;
@@ -144,13 +146,15 @@ const ContentCard = ({
     );
   }
 
+  // Use scroll-based animation that responds to scroll position
   return (
     <motion.div
-      variants={variants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.35 }}
-      className={containerClassName}
+      ref={scrollAnimation.ref}
+      style={{
+        opacity: prefersReducedMotion ? 1 : scrollAnimation.opacity,
+        y: prefersReducedMotion ? 0 : scrollAnimation.y,
+      }}
+      className="h-full will-change-transform"
     >
       {cardBody}
     </motion.div>

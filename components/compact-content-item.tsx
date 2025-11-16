@@ -2,8 +2,9 @@
 
 import React, { memo } from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import type { ContentItem } from '@/lib/content';
+import { useScrollAnimation } from '@/lib/hooks/use-scroll-animation';
 
 type CompactContentItemProps = {
   item: ContentItem;
@@ -17,6 +18,8 @@ const CompactContentItem: React.FC<CompactContentItemProps> = ({
   isActive = false,
 }) => {
   const shouldAnimate = delay > 0 || isActive;
+  const prefersReducedMotion = useReducedMotion();
+  const scrollAnimation = useScrollAnimation({ offsetStart: 0.9, offsetEnd: 0.3 });
 
   const variants = {
     hidden: { opacity: 0, y: 12 },
@@ -84,11 +87,28 @@ const CompactContentItem: React.FC<CompactContentItemProps> = ({
     return itemContent;
   }
 
+  // For items triggered by parent (isActive prop), keep existing behavior
+  if (isActive || delay > 0) {
+    return (
+      <motion.div
+        variants={variants}
+        initial="hidden"
+        animate={isActive ? 'visible' : 'hidden'}
+        className="will-change-transform"
+      >
+        {itemContent}
+      </motion.div>
+    );
+  }
+
+  // Use scroll-based animation for standalone items
   return (
     <motion.div
-      variants={variants}
-      initial="hidden"
-      animate={isActive ? 'visible' : 'hidden'}
+      ref={scrollAnimation.ref}
+      style={{
+        opacity: prefersReducedMotion ? 1 : scrollAnimation.opacity,
+        y: prefersReducedMotion ? 0 : scrollAnimation.y,
+      }}
       className="will-change-transform"
     >
       {itemContent}
