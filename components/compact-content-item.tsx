@@ -19,7 +19,7 @@ const CompactContentItem: React.FC<CompactContentItemProps> = ({
 }) => {
   const shouldAnimate = delay > 0 || isActive;
   const prefersReducedMotion = useReducedMotion();
-  const scrollAnimation = useScrollAnimation({ offsetStart: 0.9, offsetEnd: 0.3 });
+  const scrollAnimation = useScrollAnimation<HTMLDivElement>({ offsetStart: 0.9, offsetEnd: 0.3 });
 
   const variants = {
     hidden: { opacity: 0, y: 12 },

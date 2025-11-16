@@ -7,8 +7,6 @@ import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useScrollAnimation } from '@/lib/hooks/use-scroll-animation';
 
-const MotionContactSection = motion.create('section');
-
 const SOCIAL_LINKS = [
   { href: 'mailto:timo.diepers@rwth-aachen.de', label: 'Mail', icon: faEnvelope },
   { href: 'https://www.linkedin.com/in/timo-diepers/', label: 'LinkedIn', icon: faLinkedinIn },
@@ -18,10 +16,10 @@ const SOCIAL_LINKS = [
 
 const ContactSection: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
-  const scrollAnimation = useScrollAnimation({ offsetStart: 0.9, offsetEnd: 0.4 });
+  const scrollAnimation = useScrollAnimation<HTMLElement>({ offsetStart: 0.9, offsetEnd: 0.4 });
   
   return (
-    <MotionContactSection
+    <motion.section
       id="contact"
       ref={scrollAnimation.ref}
       style={{
@@ -56,7 +54,7 @@ const ContactSection: React.FC = () => {
           </a>
         ))}
       </div>
-    </MotionContactSection>
+    </motion.section>
   );
 };
 

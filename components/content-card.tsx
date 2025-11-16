@@ -26,7 +26,9 @@ const ContentCard = ({
   const shouldAnimate = !disableAnimation;
   const usesParentTrigger = shouldAnimate && typeof isActive === 'boolean';
   const { isDark, ready } = useTheme();
-  const scrollAnimation = useScrollAnimation();
+  
+  // Only use scroll animation when not using parent trigger
+  const scrollAnimation = useScrollAnimation<HTMLDivElement>();
 
   const imageSrc = useMemo(() => {
     const hasAnyImage = item.image || item.imageLight || item.imageDark;
@@ -147,6 +149,7 @@ const ContentCard = ({
   }
 
   // Use scroll-based animation that responds to scroll position
+  // Only when not using parent trigger
   return (
     <motion.div
       ref={scrollAnimation.ref}

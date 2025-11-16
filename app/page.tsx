@@ -29,15 +29,6 @@ type FeaturedSectionProps = {
   accentClass: string;
 };
 
-const MotionHeaderShell = motion.create('div');
-const MotionAccent = motion.create('span');
-const MotionTitle = motion.create('h2');
-const MotionDescription = motion.create('p');
-const MotionHighlightsShell = motion.create('div');
-const MotionDividerShell = motion.create('div');
-const MotionSection = motion.create('section');
-const MotionGrid = motion.create('div');
-
 const CARD_STAGGER_GROUP = 3;
 const CARD_STAGGER_DELAY = 0.1;
 const CARD_OVERLAP_DELAY = 0.2;
@@ -61,9 +52,9 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
   delay,
 }) => {
   const prefersReducedMotion = useReducedMotion();
-  const headerScrollAnimation = useScrollAnimation({ offsetStart: 0.8, offsetEnd: 0.3 });
-  const highlightsScrollAnimation = useScrollAnimation({ offsetStart: 0.85, offsetEnd: 0.25 });
-  const dividerScrollAnimation = useScrollAnimation({ offsetStart: 0.9, offsetEnd: 0.35 });
+  const headerScrollAnimation = useScrollAnimation<HTMLDivElement>({ offsetStart: 0.8, offsetEnd: 0.3 });
+  const highlightsScrollAnimation = useScrollAnimation<HTMLDivElement>({ offsetStart: 0.85, offsetEnd: 0.25 });
+  const dividerScrollAnimation = useScrollAnimation<HTMLDivElement>({ offsetStart: 0.9, offsetEnd: 0.35 });
 
   // Separate featured and non-featured items
   const featuredItems = items.filter(item => item.featured);
@@ -102,11 +93,11 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
       : 'basis-full pl-0 sm:basis-full md:basis-full';
 
   return (
-    <MotionSection
+    <section
       id={id}
       className="space-y-5"
     >
-      <MotionHeaderShell
+      <motion.div
         ref={headerScrollAnimation.ref}
         style={{
           opacity: prefersReducedMotion ? 1 : headerScrollAnimation.opacity,
@@ -115,29 +106,29 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
         className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
       >
         <div className="flex items-center gap-3 sm:gap-6">
-          <MotionAccent
+          <span
             className={`inline-flex pl-2 h-12 w-2 rounded-full ${accentClass}`}
           />
           <div>
-            <MotionTitle
+            <h2
               className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl pt-4"
             >
               {title}
-            </MotionTitle>
-            <MotionDescription
+            </h2>
+            <p
               className="max-w-xl text-base text-muted-foreground sm:text-lg"
             >
               {description}
-            </MotionDescription>
+            </p>
           </div>
         </div>
-      </MotionHeaderShell>
+      </motion.div>
       
       {/* Featured items in full card format */}
       {featuredItems.length > 0 && (
         <div className="space-y-5">
           {/* Animated highlights indicator */}
-          <MotionHighlightsShell
+          <motion.div
             ref={highlightsScrollAnimation.ref}
             style={{
               opacity: prefersReducedMotion ? 1 : highlightsScrollAnimation.opacity,
@@ -165,7 +156,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
               </span>
             </div>
             <div className="h-px flex-1 bg-border" />
-          </MotionHighlightsShell>
+          </motion.div>
           
           <Carousel
             opts={{ align: 'start', containScroll: 'trimSnaps' }}
@@ -189,7 +180,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
               ))}
             </CarouselContent>
           </Carousel>
-          <MotionGrid className="hidden w-full items-stretch gap-4 lg:flex lg:flex-nowrap">
+          <div className="hidden w-full items-stretch gap-4 lg:flex lg:flex-nowrap">
             {featuredItems.map((item, index) => (
               <div key={`grid-${item.id}`} className="flex-1 min-w-0">
                 <ContentCard
@@ -199,7 +190,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
                 />
               </div>
             ))}
-          </MotionGrid>
+          </div>
         </div>
       )}
       
@@ -207,7 +198,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
       {nonFeaturedItems.length > 0 && (
         <div className="space-y-3">
           {featuredItems.length > 0 && (
-            <MotionDividerShell
+            <motion.div
               ref={dividerScrollAnimation.ref}
               style={{
                 opacity: prefersReducedMotion ? 1 : dividerScrollAnimation.opacity,
@@ -220,7 +211,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
                 More {title}
               </span>
               <div className="h-px flex-1 bg-border" />
-            </MotionDividerShell>
+            </motion.div>
           )}
           
           {/* Always show first 3 non-featured items */}
@@ -257,7 +248,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
           )}
         </div>
       )}
-    </MotionSection>
+    </section>
   );
 };
 

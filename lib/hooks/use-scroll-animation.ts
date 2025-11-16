@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useScroll, useTransform, type MotionValue } from 'framer-motion';
 
 export type ScrollAnimationConfig = {
@@ -15,8 +15,8 @@ export type ScrollAnimationConfig = {
   offsetEnd?: number;
 };
 
-export type ScrollAnimationResult = {
-  ref: React.RefObject<HTMLElement>;
+export type ScrollAnimationResult<T extends HTMLElement = HTMLElement> = {
+  ref: React.RefObject<T>;
   opacity: MotionValue<number>;
   y: MotionValue<number>;
 };
@@ -26,15 +26,20 @@ export type ScrollAnimationResult = {
  * Uses framer-motion's useScroll to track scroll position and transform values
  * for opacity and y-position that respond to scrolling both up and down.
  */
-export const useScrollAnimation = (
+export const useScrollAnimation = <T extends HTMLElement = HTMLElement>(
   config: ScrollAnimationConfig = {}
-): ScrollAnimationResult => {
+): ScrollAnimationResult<T> => {
   const { offsetStart = 0.8, offsetEnd = 0.2 } = config;
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<T>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Track scroll progress of the element
   const { scrollYProgress } = useScroll({
-    target: ref,
+    target: isMounted ? ref : undefined,
     offset: [`start ${offsetStart}`, `start ${offsetEnd}`],
   });
 
