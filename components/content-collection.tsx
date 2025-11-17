@@ -106,8 +106,8 @@ const ContentCollection = ({
       </header>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {filteredItems.map((item, index) => (
-          <ContentCard key={item.id} item={item} delay={index * 0.04} />
+        {filteredItems.map((item) => (
+          <ContentCard key={item.id} item={item} />
         ))}
       </div>
 

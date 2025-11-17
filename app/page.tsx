@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import Hero from '@/components/hero';
@@ -29,27 +29,14 @@ type FeaturedSectionProps = {
   accentClass: string;
 };
 
-const CARD_STAGGER_GROUP = 3;
-const CARD_STAGGER_DELAY = 0.1;
-const CARD_OVERLAP_DELAY = 0.2;
 const COMPACT_PREVIEW_COUNT = 3;
-const MORE_DIVIDER_DELAY = 0.1;
-const COMPACT_BASE_DELAY_OFFSET = MORE_DIVIDER_DELAY;
-const COMPACT_ITEM_STAGGER = 0.08;
-const COLLAPSED_ITEM_STAGGER = 0.1;
 
-// Reset the stagger every few cards so carousel slides stay snappy.
-const getCardStaggerDelay = (index: number) =>
-  (index % CARD_STAGGER_GROUP) * CARD_STAGGER_DELAY;
-
-const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay: number }> = ({
+const FeaturedSection: React.FC<FeaturedSectionProps> = ({
   id,
   title,
   description,
   items,
   accentClass,
-  isReady,
-  delay,
 }) => {
   const prefersReducedMotion = useReducedMotion();
   const headerScrollAnimation = useScrollAnimation<HTMLDivElement>({ offsetStart: 0.8, offsetEnd: 0.3 });
@@ -61,24 +48,6 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
   const nonFeaturedItems = items.filter(item => !item.featured);
   
   const shouldPeekNextCard = featuredItems.length >= 3;
-  const [cardsActive, setCardsActive] = useState(false);
-  const [moreItemsActive, setMoreItemsActive] = useState(false);
-  
-  useEffect(() => {
-    if (isReady) {
-      const startDelayMs = Math.max(0, (delay + CARD_OVERLAP_DELAY) * 1000);
-      const timer = window.setTimeout(() => setCardsActive(true), startDelayMs);
-      return () => {
-        window.clearTimeout(timer);
-      };
-    }
-  }, [isReady, delay]);
-
-  useEffect(() => {
-    if (isReady) {
-      setMoreItemsActive(true);
-    }
-  }, [isReady]);
 
   const carouselViewportClass = 'px-4 sm:px-6 lg:px-8';
   const carouselContentClass = cn(
@@ -166,28 +135,20 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
               viewportClassName={carouselViewportClass}
               className={carouselContentClass}
             >
-              {featuredItems.map((item, index) => (
+              {featuredItems.map((item) => (
                 <CarouselItem
                   key={item.id}
                   className={carouselItemClass}
                 >
-                  <ContentCard
-                    item={item}
-                    delay={getCardStaggerDelay(index)}
-                    isActive={cardsActive}
-                  />
+                  <ContentCard item={item} />
                 </CarouselItem>
               ))}
             </CarouselContent>
           </Carousel>
           <div className="hidden w-full items-stretch gap-4 lg:flex lg:flex-nowrap">
-            {featuredItems.map((item, index) => (
+            {featuredItems.map((item) => (
               <div key={`grid-${item.id}`} className="flex-1 min-w-0">
-                <ContentCard
-                  item={item}
-                  delay={getCardStaggerDelay(index)}
-                  isActive={cardsActive}
-                />
+                <ContentCard item={item} />
               </div>
             ))}
           </div>
@@ -216,12 +177,10 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
           
           {/* Always show first 3 non-featured items */}
           <div className="grid gap-2">
-            {nonFeaturedItems.slice(0, COMPACT_PREVIEW_COUNT).map((item, index) => (
+            {nonFeaturedItems.slice(0, COMPACT_PREVIEW_COUNT).map((item) => (
               <CompactContentItem
                 key={item.id}
                 item={item}
-                delay={delay + COMPACT_BASE_DELAY_OFFSET + index * COMPACT_ITEM_STAGGER}
-                isActive={moreItemsActive}
               />
             ))}
           </div>
@@ -231,16 +190,12 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
               <CollapsibleSection 
                 expandText={`Show ${nonFeaturedItems.length - COMPACT_PREVIEW_COUNT} more`}
                 collapseText="Show less"
-                isActive={moreItemsActive}
-                delay={delay + 0.3}
               >
                 <div className="grid gap-2">
-                  {nonFeaturedItems.slice(COMPACT_PREVIEW_COUNT).map((item, index) => (
+                  {nonFeaturedItems.slice(COMPACT_PREVIEW_COUNT).map((item) => (
                     <CompactContentItem
                       key={item.id}
                       item={item}
-                      delay={index * COLLAPSED_ITEM_STAGGER}
-                      isActive={moreItemsActive}
                     />
                   ))}
               </div>
@@ -252,10 +207,7 @@ const FeaturedSection: React.FC<FeaturedSectionProps & { isReady: boolean; delay
   );
 };
 
-// Remove the filtering - pass all items to show both featured and non-featured
 const PersonalSite = () => {
-  const [heroReady, setHeroReady] = useState(false);
-
   const handleExploreClick = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     const target = document.getElementById('featured-publications');
@@ -280,7 +232,6 @@ const PersonalSite = () => {
       />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-16 pt-10 sm:px-6 lg:px-8">
         <Hero
-          onReady={() => setHeroReady(true)}
           onExploreClick={handleExploreClick}
           onContactClick={handleContactClick}
         />
@@ -292,8 +243,6 @@ const PersonalSite = () => {
             description="Explore my journal papers and scientific reports."
             items={publications}
             accentClass="bg-chart-1/60"
-            isReady={heroReady}
-            delay={0}
           />
           <FeaturedSection
             id="featured-coding"
@@ -301,8 +250,6 @@ const PersonalSite = () => {
             description="Software packages, scripts, web applications and other tools I've worked on."
             items={codingProjects}
             accentClass="bg-chart-3/60"
-            isReady={heroReady}
-            delay={0}
           />
           <FeaturedSection
             id="featured-presentations"
@@ -310,8 +257,6 @@ const PersonalSite = () => {
             description="Conference talks and workshops that showcase my research and some software tools I have developed."
             items={presentations}
             accentClass="bg-chart-5/60"
-            isReady={heroReady}
-            delay={0}
           />
         </main>
         

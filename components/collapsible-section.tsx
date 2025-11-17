@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useScrollAnimation } from '@/lib/hooks/use-scroll-animation';
 
 type CollapsibleSectionProps = {
   children: React.ReactNode;
@@ -11,23 +12,6 @@ type CollapsibleSectionProps = {
   expandText?: string;
   collapseText?: string;
   className?: string;
-  isActive?: boolean;
-  delay?: number;
-};
-
-const MotionToggleButton = motion.create('button');
-
-const toggleVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.35,
-      ease: 'easeOut',
-      delay,
-    },
-  }),
 };
 
 const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
@@ -37,10 +21,10 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   expandText = "Show more",
   collapseText = "Show less",
   className = "",
-  isActive = false,
-  delay = 0,
 }) => {
   const [internalExpanded, setInternalExpanded] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const scrollAnimation = useScrollAnimation<HTMLButtonElement>({ offsetStart: 0.9, offsetEnd: 0.35 });
   
   const isControlled = controlledExpanded !== undefined;
   const isExpanded = isControlled ? controlledExpanded : internalExpanded;
@@ -75,11 +59,12 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       </AnimatePresence>
       
       <div className="flex justify-center pt-2">
-        <MotionToggleButton
-          variants={toggleVariants}
-          initial="hidden"
-          animate={isActive ? 'visible' : 'hidden'}
-          custom={delay}
+        <motion.button
+          ref={scrollAnimation.ref}
+          style={{
+            opacity: prefersReducedMotion ? 1 : scrollAnimation.opacity,
+            y: prefersReducedMotion ? 0 : scrollAnimation.y,
+          }}
           onClick={handleToggle}
           className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-full px-3 py-1.5 hover:bg-primary/5 hover:cursor-pointer"
         >
@@ -89,7 +74,7 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
           ) : (
             <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
           )}
-        </MotionToggleButton>
+        </motion.button>
       </div>
     </div>
   );

@@ -11,23 +11,11 @@ import { useScrollAnimation } from '@/lib/hooks/use-scroll-animation';
 
 type ContentCardProps = {
   item: ContentItem;
-  delay?: number;
-  disableAnimation?: boolean;
-  isActive?: boolean;
 };
 
-const ContentCard = ({
-  item,
-  delay = 0,
-  disableAnimation = false,
-  isActive,
-}: ContentCardProps) => {
+const ContentCard = ({ item }: ContentCardProps) => {
   const prefersReducedMotion = useReducedMotion();
-  const shouldAnimate = !disableAnimation;
-  const usesParentTrigger = shouldAnimate && typeof isActive === 'boolean';
   const { isDark, ready } = useTheme();
-  
-  // Only use scroll animation when not using parent trigger
   const scrollAnimation = useScrollAnimation<HTMLDivElement>();
 
   const imageSrc = useMemo(() => {
@@ -47,26 +35,6 @@ const ContentCard = ({
     return isDark ? darkImage ?? lightImage : lightImage ?? darkImage;
   }, [item.image, item.imageDark, item.imageLight, isDark, ready]);
 
-  const transition = useMemo(
-    () => ({
-      duration: prefersReducedMotion ? 0.001 : 0.35,
-      ease: 'easeOut' as const,
-      delay: shouldAnimate ? (prefersReducedMotion ? 0 : delay) : 0,
-    }),
-    [delay, prefersReducedMotion, shouldAnimate]
-  );
-
-  const variants = useMemo(
-    () => ({
-      hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 24 },
-      visible: { opacity: 1, y: 0, transition },
-    }),
-    [prefersReducedMotion, transition]
-  );
-
-  const containerClassName = shouldAnimate
-    ? 'h-full will-change-transform opacity-0'
-    : 'h-full will-change-transform';
 
   const cardBody = (
     <Card className="group relative flex h-full flex-col rounded-3xl bg-card transition-all duration-500 hover:scale-[1.02]">
@@ -127,29 +95,6 @@ const ContentCard = ({
     </Card>
   );
 
-  if (!shouldAnimate) {
-    return (
-      <motion.div initial={false} className="h-full will-change-transform">
-        {cardBody}
-      </motion.div>
-    );
-  }
-
-  if (usesParentTrigger) {
-    return (
-      <motion.div
-        variants={variants}
-        initial="hidden"
-        animate={isActive ? 'visible' : 'hidden'}
-        className={containerClassName}
-      >
-        {cardBody}
-      </motion.div>
-    );
-  }
-
-  // Use scroll-based animation that responds to scroll position
-  // Only when not using parent trigger
   return (
     <motion.div
       ref={scrollAnimation.ref}

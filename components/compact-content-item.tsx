@@ -8,31 +8,11 @@ import { useScrollAnimation } from '@/lib/hooks/use-scroll-animation';
 
 type CompactContentItemProps = {
   item: ContentItem;
-  delay?: number;
-  isActive?: boolean;
 };
 
-const CompactContentItem: React.FC<CompactContentItemProps> = ({
-  item,
-  delay = 0,
-  isActive = false,
-}) => {
-  const shouldAnimate = delay > 0 || isActive;
+const CompactContentItem: React.FC<CompactContentItemProps> = ({ item }) => {
   const prefersReducedMotion = useReducedMotion();
   const scrollAnimation = useScrollAnimation<HTMLDivElement>({ offsetStart: 0.9, offsetEnd: 0.3 });
-
-  const variants = {
-    hidden: { opacity: 0, y: 12 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        duration: 0.35, 
-        ease: 'easeOut' as const, 
-        delay: shouldAnimate ? delay : 0 
-      } 
-    },
-  };
 
   const itemContent = (
     <div className="group flex items-start gap-3 rounded-3xl px-5 sm:px-6 py-3 bg-card/50 transition-all duration-500 hover:bg-card hover:scale-[1.01]">
@@ -83,25 +63,6 @@ const CompactContentItem: React.FC<CompactContentItemProps> = ({
     </div>
   );
 
-  if (!shouldAnimate) {
-    return itemContent;
-  }
-
-  // For items triggered by parent (isActive prop), keep existing behavior
-  if (isActive || delay > 0) {
-    return (
-      <motion.div
-        variants={variants}
-        initial="hidden"
-        animate={isActive ? 'visible' : 'hidden'}
-        className="will-change-transform"
-      >
-        {itemContent}
-      </motion.div>
-    );
-  }
-
-  // Use scroll-based animation for standalone items
   return (
     <motion.div
       ref={scrollAnimation.ref}
