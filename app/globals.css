@@ -131,9 +131,3 @@
     100% { background-position: 100% 50%; }
   }
 }
-
-@keyframes avatar-ring-bg {
-  0%, 100% { background-color: #006fd0; }
-  33%       { background-color: #8b5cf6; }
-  66%       { background-color: #06b6d4; }
-}

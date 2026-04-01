@@ -110,9 +110,11 @@ const Section: React.FC<SectionProps> = ({ id, title, items, activeTag, onTagCli
   if (items.length === 0) return null;
   return (
     <section id={id}>
-      <h2 className="text-xs font-mono font-semibold uppercase tracking-widest text-muted-foreground pb-1.5 border-b border-border mb-0 flex items-baseline gap-2">
-        <span>{title}</span>
-        <span className="text-muted-foreground/40 font-normal normal-case tracking-normal">
+      {/* Section header styled as a code comment — the unique visual theme */}
+      <h2 className="text-xs font-mono pb-1.5 border-b border-border mb-0 flex items-baseline gap-1.5">
+        <span className="text-emerald-700 dark:text-emerald-500 select-none font-normal">//</span>
+        <span className="font-semibold uppercase tracking-widest text-muted-foreground">{title}</span>
+        <span className="text-muted-foreground/35 font-normal normal-case tracking-normal ml-0.5">
           ({items.length})
         </span>
       </h2>
