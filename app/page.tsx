@@ -1,13 +1,57 @@
 'use client';
 
-import React, { useCallback } from 'react';
-import { ArrowUpRight } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
+import { ArrowUpRight, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import Hero from '@/components/hero';
 import ContactSection from '@/components/contact-section';
+import ThemeToggle from '@/components/theme-toggle';
 import type { ContentItem } from '@/lib/content';
 import { codingProjects, presentations, publications } from '@/lib/content';
 
-const ItemRow: React.FC<{ item: ContentItem }> = ({ item }) => (
+// ─── Sticky header ────────────────────────────────────────────────────────────
+
+const StickyHeader: React.FC<{ visible: boolean }> = ({ visible }) => (
+  <div
+    className={cn(
+      'fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-md',
+      'transition-[transform,opacity] duration-300 ease-in-out',
+      visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none',
+    )}
+  >
+    <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-2 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-2 min-w-0">
+        <Image
+          src="/profile_pic_cut.jpeg"
+          alt="Timo Diepers"
+          width={22}
+          height={22}
+          className="rounded-full object-cover shrink-0"
+          style={{ width: 22, height: 22 }}
+        />
+        <span className="text-sm font-mono font-semibold truncate">Timo Diepers</span>
+      </div>
+      <nav className="hidden sm:flex items-center gap-4 text-xs font-mono text-muted-foreground">
+        <a href="#publications" className="hover:text-primary transition-colors">publications</a>
+        <a href="#coding" className="hover:text-primary transition-colors">coding</a>
+        <a href="#presentations" className="hover:text-primary transition-colors">presentations</a>
+        <a href="#contact" className="hover:text-primary transition-colors">contact</a>
+      </nav>
+      <ThemeToggle size="sm" className="shrink-0" />
+    </div>
+  </div>
+);
+
+// ─── Item row ─────────────────────────────────────────────────────────────────
+
+type ItemRowProps = {
+  item: ContentItem;
+  activeTag: string | null;
+  onTagClick: (tag: string) => void;
+};
+
+const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => (
   <div className="group py-2 border-b border-border/40 last:border-0">
     <div className="flex items-start justify-between gap-3 min-w-0">
       <span className="text-sm font-medium leading-snug group-hover:text-primary transition-colors duration-150 min-w-0">
@@ -32,29 +76,77 @@ const ItemRow: React.FC<{ item: ContentItem }> = ({ item }) => (
       <p className="text-xs font-mono text-muted-foreground mt-0.5">{item.meta}</p>
     )}
     <div className="flex flex-wrap gap-x-2 mt-0.5">
-      {item.topics.map((topic) => (
-        <span key={topic} className="text-xs text-muted-foreground/60 font-mono">
-          #{topic.toLowerCase().replace(/\s+/g, '-')}
-        </span>
-      ))}
+      {item.topics.map((topic) => {
+        const slug = topic.toLowerCase().replace(/\s+/g, '-');
+        const isActive = activeTag === slug;
+        return (
+          <button
+            key={topic}
+            onClick={() => onTagClick(slug)}
+            className={cn(
+              'text-xs font-mono transition-colors cursor-pointer hover:text-primary',
+              isActive ? 'text-primary font-semibold' : 'text-muted-foreground/60',
+            )}
+          >
+            #{slug}
+          </button>
+        );
+      })}
     </div>
   </div>
 );
 
-type SectionProps = { id: string; title: string; items: ContentItem[] };
+// ─── Section ──────────────────────────────────────────────────────────────────
 
-const Section: React.FC<SectionProps> = ({ id, title, items }) => (
-  <section id={id}>
-    <h2 className="text-xs font-mono font-semibold uppercase tracking-widest text-muted-foreground pb-1.5 border-b border-border mb-0">
-      {title}
-    </h2>
-    {items.map((item) => (
-      <ItemRow key={item.id} item={item} />
-    ))}
-  </section>
-);
+type SectionProps = {
+  id: string;
+  title: string;
+  items: ContentItem[];
+  activeTag: string | null;
+  onTagClick: (tag: string) => void;
+};
+
+const Section: React.FC<SectionProps> = ({ id, title, items, activeTag, onTagClick }) => {
+  if (items.length === 0) return null;
+  return (
+    <section id={id}>
+      <h2 className="text-xs font-mono font-semibold uppercase tracking-widest text-muted-foreground pb-1.5 border-b border-border mb-0 flex items-baseline gap-2">
+        <span>{title}</span>
+        <span className="text-muted-foreground/40 font-normal normal-case tracking-normal">
+          ({items.length})
+        </span>
+      </h2>
+      {items.map((item) => (
+        <ItemRow key={item.id} item={item} activeTag={activeTag} onTagClick={onTagClick} />
+      ))}
+    </section>
+  );
+};
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 const PersonalSite = () => {
+  const [scrolled, setScrolled] = useState(false);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 72);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveTag(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const handleTagClick = useCallback((tag: string) => {
+    setActiveTag((prev) => (prev === tag ? null : tag));
+  }, []);
+
   const handleExploreClick = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     document.getElementById('publications')?.scrollIntoView({ behavior: 'smooth' });
@@ -65,19 +157,60 @@ const PersonalSite = () => {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
+  const filterItems = useCallback(
+    (items: ContentItem[]) =>
+      activeTag
+        ? items.filter((item) =>
+            item.topics.some((t) => t.toLowerCase().replace(/\s+/g, '-') === activeTag),
+          )
+        : items,
+    [activeTag],
+  );
+
+  const filteredPubs = filterItems(publications);
+  const filteredCode = filterItems(codingProjects);
+  const filteredPres = filterItems(presentations);
+  const noResults = activeTag && filteredPubs.length === 0 && filteredCode.length === 0 && filteredPres.length === 0;
+
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
-      <Hero
-        onExploreClick={handleExploreClick}
-        onContactClick={handleContactClick}
-      />
-      <main className="mt-6 space-y-6">
-        <Section id="publications" title="Publications" items={publications} />
-        <Section id="coding" title="Coding Projects" items={codingProjects} />
-        <Section id="presentations" title="Presentations" items={presentations} />
-      </main>
-      <ContactSection />
-    </div>
+    <>
+      <StickyHeader visible={scrolled} />
+      <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
+        <Hero
+          onExploreClick={handleExploreClick}
+          onContactClick={handleContactClick}
+        />
+
+        {/* Active tag filter indicator */}
+        {activeTag && (
+          <div className="mt-4 flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
+            <span>filter:</span>
+            <span className="text-primary">#{activeTag}</span>
+            <button
+              onClick={() => setActiveTag(null)}
+              className="ml-1 flex items-center gap-0.5 hover:text-primary transition-colors"
+              aria-label="Clear filter"
+            >
+              <X className="h-3 w-3" />
+              <span>esc</span>
+            </button>
+          </div>
+        )}
+
+        <main className="mt-6 space-y-6">
+          <Section id="publications"   title="Publications"    items={filteredPubs} activeTag={activeTag} onTagClick={handleTagClick} />
+          <Section id="coding"         title="Coding Projects" items={filteredCode} activeTag={activeTag} onTagClick={handleTagClick} />
+          <Section id="presentations"  title="Presentations"   items={filteredPres} activeTag={activeTag} onTagClick={handleTagClick} />
+          {noResults && (
+            <p className="text-xs font-mono text-muted-foreground">
+              no items matching #{activeTag}
+            </p>
+          )}
+        </main>
+
+        <ContactSection />
+      </div>
+    </>
   );
 };
 

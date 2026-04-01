@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import ThemeToggle from '@/components/theme-toggle';
 import TypingText from './ui/shadcn-io/typing-text';
 
@@ -20,7 +21,22 @@ const Hero = ({ onReady, onExploreClick, onContactClick }: HeroProps) => {
     <header className="pb-4 border-b border-border">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight font-mono flex items-baseline flex-wrap gap-x-1">
+          <h1 className="text-xl font-bold tracking-tight font-mono flex items-center flex-wrap gap-x-2">
+            {/* Avatar with animated color-cycling ring matching the typing text colors */}
+            <div
+              className="shrink-0 rounded-full p-[2px]"
+              style={{ animation: 'avatar-ring-bg 6s ease-in-out infinite' }}
+            >
+              <Image
+                src="/profile_pic_cut.jpeg"
+                alt="Timo Diepers"
+                width={34}
+                height={34}
+                priority
+                className="rounded-full object-cover block bg-background"
+                style={{ width: 34, height: 34 }}
+              />
+            </div>
             <span>Timo Diepers</span>
             <span className="text-muted-foreground font-normal">&gt;</span>
             <TypingText
