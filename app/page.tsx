@@ -1,73 +1,13 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import Image from 'next/image';
 import { ArrowUpRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Hero from '@/components/hero';
-import ThemeToggle from '@/components/theme-toggle';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Sidebar from '@/components/hero';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { ContentItem } from '@/lib/content';
 import { codingProjects, presentations, publications } from '@/lib/content';
-
-type TabId = 'publications' | 'coding' | 'presentations';
-
-const TABS: { id: TabId; label: string; items: ContentItem[] }[] = [
-  { id: 'publications',  label: 'publications',  items: publications  },
-  { id: 'coding',        label: 'coding',        items: codingProjects },
-  { id: 'presentations', label: 'presentations', items: presentations },
-];
-
-// ─── Sticky header ────────────────────────────────────────────────────────────
-
-type StickyHeaderProps = {
-  visible: boolean;
-  activeTab: TabId;
-  onTabChange: (tab: TabId) => void;
-};
-
-const StickyHeader: React.FC<StickyHeaderProps> = ({ visible, activeTab, onTabChange }) => (
-  <div
-    className={cn(
-      'fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-md',
-      'transition-[transform,opacity] duration-300 ease-in-out',
-      visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none',
-    )}
-  >
-    <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-2 flex items-center justify-between gap-4">
-      <div className="flex items-center gap-2 min-w-0">
-        <Image
-          src="/profile_pic_cut.jpeg"
-          alt="Timo Diepers"
-          width={22}
-          height={22}
-          className="rounded-full object-cover shrink-0"
-          style={{ width: 22, height: 22 }}
-        />
-        <span className="text-sm font-mono font-semibold truncate">Timo Diepers</span>
-      </div>
-      <nav className="hidden sm:flex items-center gap-1 text-xs font-mono">
-        {TABS.map(({ id, label }) => (
-          <button
-            key={id}
-            onClick={() => onTabChange(id)}
-            className={cn(
-              'px-2 py-1 rounded-md transition-colors',
-              activeTab === id
-                ? 'text-foreground bg-muted'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
-      <ThemeToggle size="sm" className="shrink-0" />
-    </div>
-  </div>
-);
 
 // ─── Item row ─────────────────────────────────────────────────────────────────
 
@@ -83,7 +23,6 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
 
   return (
     <div className="group py-2.5 border-b border-border/40 last:border-0">
-      {/* Title + links row */}
       <div className="flex items-start justify-between gap-3 min-w-0">
         <span className="text-sm font-medium leading-snug group-hover:text-primary transition-colors duration-150 min-w-0">
           {item.title}
@@ -124,12 +63,10 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
         </div>
       </div>
 
-      {/* Meta */}
       {item.meta && (
         <p className="text-xs font-mono text-muted-foreground mt-0.5">{item.meta}</p>
       )}
 
-      {/* Topic badges */}
       <div className="flex flex-wrap gap-1 mt-1.5">
         {item.topics.map((topic) => {
           const slug = topic.toLowerCase().replace(/\s+/g, '-');
@@ -149,18 +86,39 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
   );
 };
 
+// ─── Section ──────────────────────────────────────────────────────────────────
+
+type SectionProps = {
+  id: string;
+  title: string;
+  items: ContentItem[];
+  activeTag: string | null;
+  onTagClick: (tag: string) => void;
+};
+
+const Section: React.FC<SectionProps> = ({ id, title, items, activeTag, onTagClick }) => (
+  <section id={id} className="scroll-mt-6">
+    <h2 className="flex items-baseline gap-1.5 text-xs font-mono pb-1.5 border-b border-border">
+      <span className="text-emerald-700 dark:text-emerald-500 select-none">{'//'}</span>
+      <span className="font-semibold uppercase tracking-widest text-muted-foreground">{title}</span>
+      <span className="text-muted-foreground/35 font-normal normal-case tracking-normal ml-0.5">
+        ({items.length})
+      </span>
+    </h2>
+    {items.length > 0 ? (
+      items.map((item) => (
+        <ItemRow key={item.id} item={item} activeTag={activeTag} onTagClick={onTagClick} />
+      ))
+    ) : (
+      <p className="py-3 text-xs font-mono text-muted-foreground">no items matching filter</p>
+    )}
+  </section>
+);
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const PersonalSite = () => {
-  const [scrolled,  setScrolled]  = useState(false);
-  const [activeTab, setActiveTab] = useState<TabId>('publications');
   const [activeTag, setActiveTag] = useState<string | null>(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 72);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setActiveTag(null); };
@@ -181,88 +139,45 @@ const PersonalSite = () => {
     [activeTag],
   );
 
-  const filtered = {
-    publications:  filterItems(publications),
-    coding:        filterItems(codingProjects),
-    presentations: filterItems(presentations),
-  };
-
   return (
-    <>
-      <StickyHeader
-        visible={scrolled}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Two-column grid: sidebar left, content right */}
+      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-y-6 lg:gap-x-12">
+        <Sidebar />
 
-      <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
-        <Hero />
+        {/* Right: content */}
+        <main className="min-w-0">
+          {/* Mobile: bio below header */}
+          <p className="text-sm text-muted-foreground leading-snug mb-5 lg:hidden">
+            Methods for designing Sustainable Processes &amp; Systems using Life Cycle Assessment and Mathematical Optimization.
+          </p>
 
-        {/* Active tag filter pill */}
-        {activeTag && (
-          <div className="mt-3 flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
-            <span>filter:</span>
-            <span className="text-primary">#{activeTag}</span>
-            <button
-              onClick={() => setActiveTag(null)}
-              className="ml-1 flex items-center gap-0.5 hover:text-primary transition-colors"
-              aria-label="Clear filter"
-            >
-              <X className="h-3 w-3" />
-              <span>esc</span>
-            </button>
+          {/* Active tag filter pill */}
+          {activeTag && (
+            <div className="mb-4 flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
+              <span>filter:</span>
+              <span className="text-primary">#{activeTag}</span>
+              <button
+                onClick={() => setActiveTag(null)}
+                className={cn(
+                  'ml-1 flex items-center gap-0.5 hover:text-primary transition-colors',
+                )}
+                aria-label="Clear filter"
+              >
+                <X className="h-3 w-3" />
+                <span>esc</span>
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-8">
+            <Section id="publications"  title="Publications"    items={filterItems(publications)}   activeTag={activeTag} onTagClick={handleTagClick} />
+            <Section id="coding"        title="Coding Projects" items={filterItems(codingProjects)} activeTag={activeTag} onTagClick={handleTagClick} />
+            <Section id="presentations" title="Presentations"   items={filterItems(presentations)}  activeTag={activeTag} onTagClick={handleTagClick} />
           </div>
-        )}
-
-        {/* Main tabs */}
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as TabId)}
-          className="mt-5"
-        >
-          {/* Underline-style tab list */}
-          <TabsList className="w-full justify-start bg-transparent rounded-none border-b border-border p-0 h-auto gap-0">
-            {TABS.map(({ id, label }) => {
-              const count = filtered[id].length;
-              return (
-                <TabsTrigger
-                  key={id}
-                  value={id}
-                  className={cn(
-                    'font-mono text-xs rounded-none border-b-2 -mb-px border-transparent px-3 pb-2.5 pt-0 gap-1.5',
-                    'data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground',
-                    'text-muted-foreground',
-                  )}
-                >
-                  <span className="text-emerald-700 dark:text-emerald-500 select-none">{'//'}</span>
-                  {label}
-                  <span className="text-muted-foreground/40">({count})</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-
-          {TABS.map(({ id }) => (
-            <TabsContent key={id} value={id} className="mt-0">
-              {filtered[id].length > 0 ? (
-                filtered[id].map((item) => (
-                  <ItemRow
-                    key={item.id}
-                    item={item}
-                    activeTag={activeTag}
-                    onTagClick={handleTagClick}
-                  />
-                ))
-              ) : (
-                <p className="py-4 text-xs font-mono text-muted-foreground">
-                  no items matching #{activeTag}
-                </p>
-              )}
-            </TabsContent>
-          ))}
-        </Tabs>
+        </main>
       </div>
-    </>
+    </div>
   );
 };
 
