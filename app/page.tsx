@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import Hero from '@/components/hero';
 import ContactSection from '@/components/contact-section';
 import ThemeToggle from '@/components/theme-toggle';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { ContentItem } from '@/lib/content';
 import { codingProjects, presentations, publications } from '@/lib/content';
 
@@ -76,7 +77,6 @@ type ItemRowProps = {
 };
 
 const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
-  const [open, setOpen] = useState(false);
   const primaryLink = item.links[0];
   const extraLinks  = item.links.slice(1);
 
@@ -99,36 +99,28 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
             </a>
           )}
           {extraLinks.length > 0 && (
-            <button
-              onClick={() => setOpen(v => !v)}
-              className={cn(
-                'text-xs font-mono transition-colors whitespace-nowrap',
-                open ? 'text-primary' : 'text-muted-foreground/50 hover:text-primary',
-              )}
-              aria-expanded={open}
-            >
-              {open ? '−' : `+${extraLinks.length}`}
-            </button>
+            <Popover>
+              <PopoverTrigger className="text-xs font-mono text-muted-foreground/50 hover:text-primary transition-colors whitespace-nowrap cursor-pointer">
+                +{extraLinks.length}
+              </PopoverTrigger>
+              <PopoverContent align="end" className="flex flex-col gap-1 min-w-0 w-auto">
+                {extraLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-mono text-primary hover:text-primary/70 transition-colors whitespace-nowrap px-1 py-0.5 rounded hover:bg-muted"
+                  >
+                    {link.label}
+                    <ArrowUpRight className="h-3 w-3 shrink-0" />
+                  </a>
+                ))}
+              </PopoverContent>
+            </Popover>
           )}
         </div>
       </div>
-
-      {open && (
-        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 ml-0">
-          {extraLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-0.5 text-xs font-mono text-primary hover:text-primary/70 transition-colors"
-            >
-              {link.label}
-              <ArrowUpRight className="h-3 w-3" />
-            </a>
-          ))}
-        </div>
-      )}
 
       {item.meta && (
         <p className="text-xs font-mono text-muted-foreground mt-0.5">{item.meta}</p>
