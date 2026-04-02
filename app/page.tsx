@@ -5,39 +5,30 @@ import Image from 'next/image';
 import { ArrowUpRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Hero from '@/components/hero';
-import ContactSection from '@/components/contact-section';
 import ThemeToggle from '@/components/theme-toggle';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { ContentItem } from '@/lib/content';
 import { codingProjects, presentations, publications } from '@/lib/content';
 
-// ─── Section color palette (CSS vars → theme-aware) ───────────────────────────
+type TabId = 'publications' | 'coding' | 'presentations';
 
-const SECTION_COLORS: Record<string, string> = {
-  top:           'var(--chart-1)',
-  publications:  'var(--chart-1)',
-  coding:        'var(--chart-3)',
-  presentations: 'var(--chart-5)',
-};
-
-// ─── Scroll progress bar ──────────────────────────────────────────────────────
-// Fills top-to-bottom as you scroll; color shifts per section like an IDE gutter
-
-const ScrollProgressBar: React.FC<{ progress: number; section: string }> = ({ progress, section }) => (
-  <div aria-hidden className="fixed left-0 top-0 bottom-0 w-[3px] z-40 pointer-events-none">
-    <div
-      style={{
-        height: `${progress * 100}%`,
-        backgroundColor: SECTION_COLORS[section] ?? 'var(--chart-1)',
-        transition: 'height 80ms linear, background-color 600ms ease-in-out',
-      }}
-    />
-  </div>
-);
+const TABS: { id: TabId; label: string; items: ContentItem[] }[] = [
+  { id: 'publications',  label: 'publications',  items: publications  },
+  { id: 'coding',        label: 'coding',        items: codingProjects },
+  { id: 'presentations', label: 'presentations', items: presentations },
+];
 
 // ─── Sticky header ────────────────────────────────────────────────────────────
 
-const StickyHeader: React.FC<{ visible: boolean }> = ({ visible }) => (
+type StickyHeaderProps = {
+  visible: boolean;
+  activeTab: TabId;
+  onTabChange: (tab: TabId) => void;
+};
+
+const StickyHeader: React.FC<StickyHeaderProps> = ({ visible, activeTab, onTabChange }) => (
   <div
     className={cn(
       'fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-md',
@@ -57,11 +48,21 @@ const StickyHeader: React.FC<{ visible: boolean }> = ({ visible }) => (
         />
         <span className="text-sm font-mono font-semibold truncate">Timo Diepers</span>
       </div>
-      <nav className="hidden sm:flex items-center gap-4 text-xs font-mono text-muted-foreground">
-        <a href="#publications"  className="hover:text-primary transition-colors">publications</a>
-        <a href="#coding"        className="hover:text-primary transition-colors">coding</a>
-        <a href="#presentations" className="hover:text-primary transition-colors">presentations</a>
-        <a href="#contact"       className="hover:text-primary transition-colors">contact</a>
+      <nav className="hidden sm:flex items-center gap-1 text-xs font-mono">
+        {TABS.map(({ id, label }) => (
+          <button
+            key={id}
+            onClick={() => onTabChange(id)}
+            className={cn(
+              'px-2 py-1 rounded-md transition-colors',
+              activeTab === id
+                ? 'text-foreground bg-muted'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {label}
+          </button>
+        ))}
       </nav>
       <ThemeToggle size="sm" className="shrink-0" />
     </div>
@@ -81,7 +82,8 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
   const extraLinks  = item.links.slice(1);
 
   return (
-    <div className="group py-2 border-b border-border/40 last:border-0">
+    <div className="group py-2.5 border-b border-border/40 last:border-0">
+      {/* Title + links row */}
       <div className="flex items-start justify-between gap-3 min-w-0">
         <span className="text-sm font-medium leading-snug group-hover:text-primary transition-colors duration-150 min-w-0">
           {item.title}
@@ -103,14 +105,14 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
               <PopoverTrigger className="text-xs font-mono text-muted-foreground/50 hover:text-primary transition-colors whitespace-nowrap cursor-pointer">
                 +{extraLinks.length}
               </PopoverTrigger>
-              <PopoverContent align="end" className="flex flex-col gap-1 min-w-0 w-auto">
+              <PopoverContent align="end" className="flex flex-col gap-1 w-auto p-2">
                 {extraLinks.map((link) => (
                   <a
                     key={link.href}
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-mono text-primary hover:text-primary/70 transition-colors whitespace-nowrap px-1 py-0.5 rounded hover:bg-muted"
+                    className="inline-flex items-center gap-1 text-xs font-mono text-foreground hover:text-primary transition-colors whitespace-nowrap px-2 py-1 rounded-sm hover:bg-muted"
                   >
                     {link.label}
                     <ArrowUpRight className="h-3 w-3 shrink-0" />
@@ -122,23 +124,24 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
         </div>
       </div>
 
+      {/* Meta */}
       {item.meta && (
         <p className="text-xs font-mono text-muted-foreground mt-0.5">{item.meta}</p>
       )}
-      <div className="flex flex-wrap gap-x-2 mt-0.5">
+
+      {/* Topic badges */}
+      <div className="flex flex-wrap gap-1 mt-1.5">
         {item.topics.map((topic) => {
           const slug = topic.toLowerCase().replace(/\s+/g, '-');
           return (
-            <button
+            <Badge
               key={topic}
+              variant={activeTag === slug ? 'active' : 'outline'}
+              className="cursor-pointer hover:border-primary/40 hover:bg-primary/10 hover:text-primary transition-colors"
               onClick={() => onTagClick(slug)}
-              className={cn(
-                'text-xs font-mono transition-colors cursor-pointer hover:text-primary',
-                activeTag === slug ? 'text-primary font-semibold' : 'text-muted-foreground/60',
-              )}
             >
-              #{slug}
-            </button>
+              {topic}
+            </Badge>
           );
         })}
       </div>
@@ -146,64 +149,15 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
   );
 };
 
-// ─── Section ──────────────────────────────────────────────────────────────────
-
-type SectionProps = {
-  id: string;
-  title: string;
-  items: ContentItem[];
-  activeTag: string | null;
-  onTagClick: (tag: string) => void;
-};
-
-const Section: React.FC<SectionProps> = ({ id, title, items, activeTag, onTagClick }) => {
-  if (items.length === 0) return null;
-  return (
-    <section id={id}>
-      <h2 className="text-xs font-mono pb-1.5 border-b border-border mb-0 flex items-baseline gap-1.5">
-        <span className="text-emerald-700 dark:text-emerald-500 select-none font-normal">{'//'}</span>
-        <span className="font-semibold uppercase tracking-widest text-muted-foreground">{title}</span>
-        <span className="text-muted-foreground/35 font-normal normal-case tracking-normal ml-0.5">
-          ({items.length})
-        </span>
-      </h2>
-      {items.map((item) => (
-        <ItemRow key={item.id} item={item} activeTag={activeTag} onTagClick={onTagClick} />
-      ))}
-    </section>
-  );
-};
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const PersonalSite = () => {
-  const [scrolled,      setScrolled]      = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [scrollSection,  setScrollSection]  = useState('top');
-  const [activeTag,     setActiveTag]     = useState<string | null>(null);
+  const [scrolled,  setScrolled]  = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>('publications');
+  const [activeTag, setActiveTag] = useState<string | null>(null);
 
   useEffect(() => {
-    const onScroll = () => {
-      const sy = window.scrollY;
-      setScrolled(sy > 72);
-
-      // Reading progress 0→1
-      const total = document.body.scrollHeight - window.innerHeight;
-      setScrollProgress(total > 0 ? sy / total : 0);
-
-      // Section color: walk in reverse DOM order, first one whose top is above 40% viewport
-      const ids = ['presentations', 'coding', 'publications'] as const;
-      let found = 'top';
-      for (const id of ids) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.45) {
-          found = id;
-          break;
-        }
-      }
-      setScrollSection(found);
-    };
-
+    const onScroll = () => setScrolled(window.scrollY > 72);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -218,16 +172,6 @@ const PersonalSite = () => {
     setActiveTag((prev) => (prev === tag ? null : tag));
   }, []);
 
-  const handleExploreClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    document.getElementById('publications')?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
-  const handleContactClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
   const filterItems = useCallback(
     (items: ContentItem[]) =>
       activeTag
@@ -237,24 +181,26 @@ const PersonalSite = () => {
     [activeTag],
   );
 
-  const filteredPubs = filterItems(publications);
-  const filteredCode = filterItems(codingProjects);
-  const filteredPres = filterItems(presentations);
-  const noResults    = activeTag && !filteredPubs.length && !filteredCode.length && !filteredPres.length;
+  const filtered = {
+    publications:  filterItems(publications),
+    coding:        filterItems(codingProjects),
+    presentations: filterItems(presentations),
+  };
 
   return (
     <>
-      <ScrollProgressBar progress={scrollProgress} section={scrollSection} />
-      <StickyHeader visible={scrolled} />
+      <StickyHeader
+        visible={scrolled}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
       <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
-        <Hero
-          onExploreClick={handleExploreClick}
-          onContactClick={handleContactClick}
-        />
+        <Hero />
 
+        {/* Active tag filter pill */}
         {activeTag && (
-          <div className="mt-4 flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
+          <div className="mt-3 flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
             <span>filter:</span>
             <span className="text-primary">#{activeTag}</span>
             <button
@@ -268,16 +214,53 @@ const PersonalSite = () => {
           </div>
         )}
 
-        <main className="mt-6 space-y-6">
-          <Section id="publications"   title="Publications"    items={filteredPubs} activeTag={activeTag} onTagClick={handleTagClick} />
-          <Section id="coding"         title="Coding Projects" items={filteredCode} activeTag={activeTag} onTagClick={handleTagClick} />
-          <Section id="presentations"  title="Presentations"   items={filteredPres} activeTag={activeTag} onTagClick={handleTagClick} />
-          {noResults && (
-            <p className="text-xs font-mono text-muted-foreground">no items matching #{activeTag}</p>
-          )}
-        </main>
+        {/* Main tabs */}
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as TabId)}
+          className="mt-5"
+        >
+          {/* Underline-style tab list */}
+          <TabsList className="w-full justify-start bg-transparent rounded-none border-b border-border p-0 h-auto gap-0">
+            {TABS.map(({ id, label }) => {
+              const count = filtered[id].length;
+              return (
+                <TabsTrigger
+                  key={id}
+                  value={id}
+                  className={cn(
+                    'font-mono text-xs rounded-none border-b-2 -mb-px border-transparent px-3 pb-2.5 pt-0 gap-1.5',
+                    'data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground',
+                    'text-muted-foreground',
+                  )}
+                >
+                  <span className="text-emerald-700 dark:text-emerald-500 select-none">{'//'}</span>
+                  {label}
+                  <span className="text-muted-foreground/40">({count})</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
 
-        <ContactSection />
+          {TABS.map(({ id }) => (
+            <TabsContent key={id} value={id} className="mt-0">
+              {filtered[id].length > 0 ? (
+                filtered[id].map((item) => (
+                  <ItemRow
+                    key={item.id}
+                    item={item}
+                    activeTag={activeTag}
+                    onTagClick={handleTagClick}
+                  />
+                ))
+              ) : (
+                <p className="py-4 text-xs font-mono text-muted-foreground">
+                  no items matching #{activeTag}
+                </p>
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     </>
   );
