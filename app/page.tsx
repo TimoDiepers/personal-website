@@ -75,49 +75,84 @@ type ItemRowProps = {
   onTagClick: (tag: string) => void;
 };
 
-const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => (
-  <div className="group py-2 border-b border-border/40 last:border-0">
-    <div className="flex items-start justify-between gap-3 min-w-0">
-      <span className="text-sm font-medium leading-snug group-hover:text-primary transition-colors duration-150 min-w-0">
-        {item.title}
-      </span>
-      <div className="flex gap-2 items-center shrink-0">
-        {item.links.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-0.5 text-xs font-mono text-primary hover:text-primary/70 transition-colors whitespace-nowrap"
-          >
-            {link.label}
-            <ArrowUpRight className="h-3 w-3" />
-          </a>
-        ))}
+const ItemRow: React.FC<ItemRowProps> = ({ item, activeTag, onTagClick }) => {
+  const [open, setOpen] = useState(false);
+  const primaryLink = item.links[0];
+  const extraLinks  = item.links.slice(1);
+
+  return (
+    <div className="group py-2 border-b border-border/40 last:border-0">
+      <div className="flex items-start justify-between gap-3 min-w-0">
+        <span className="text-sm font-medium leading-snug group-hover:text-primary transition-colors duration-150 min-w-0">
+          {item.title}
+        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          {primaryLink && (
+            <a
+              href={primaryLink.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-0.5 text-xs font-mono text-primary hover:text-primary/70 transition-colors whitespace-nowrap"
+            >
+              {primaryLink.label}
+              <ArrowUpRight className="h-3 w-3" />
+            </a>
+          )}
+          {extraLinks.length > 0 && (
+            <button
+              onClick={() => setOpen(v => !v)}
+              className={cn(
+                'text-xs font-mono transition-colors whitespace-nowrap',
+                open ? 'text-primary' : 'text-muted-foreground/50 hover:text-primary',
+              )}
+              aria-expanded={open}
+            >
+              {open ? '−' : `+${extraLinks.length}`}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {open && (
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 ml-0">
+          {extraLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-0.5 text-xs font-mono text-primary hover:text-primary/70 transition-colors"
+            >
+              {link.label}
+              <ArrowUpRight className="h-3 w-3" />
+            </a>
+          ))}
+        </div>
+      )}
+
+      {item.meta && (
+        <p className="text-xs font-mono text-muted-foreground mt-0.5">{item.meta}</p>
+      )}
+      <div className="flex flex-wrap gap-x-2 mt-0.5">
+        {item.topics.map((topic) => {
+          const slug = topic.toLowerCase().replace(/\s+/g, '-');
+          return (
+            <button
+              key={topic}
+              onClick={() => onTagClick(slug)}
+              className={cn(
+                'text-xs font-mono transition-colors cursor-pointer hover:text-primary',
+                activeTag === slug ? 'text-primary font-semibold' : 'text-muted-foreground/60',
+              )}
+            >
+              #{slug}
+            </button>
+          );
+        })}
       </div>
     </div>
-    {item.meta && (
-      <p className="text-xs font-mono text-muted-foreground mt-0.5">{item.meta}</p>
-    )}
-    <div className="flex flex-wrap gap-x-2 mt-0.5">
-      {item.topics.map((topic) => {
-        const slug = topic.toLowerCase().replace(/\s+/g, '-');
-        return (
-          <button
-            key={topic}
-            onClick={() => onTagClick(slug)}
-            className={cn(
-              'text-xs font-mono transition-colors cursor-pointer hover:text-primary',
-              activeTag === slug ? 'text-primary font-semibold' : 'text-muted-foreground/60',
-            )}
-          >
-            #{slug}
-          </button>
-        );
-      })}
-    </div>
-  </div>
-);
+  );
+};
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 
@@ -217,17 +252,6 @@ const PersonalSite = () => {
 
   return (
     <>
-      {/* Dot-grid engineering-paper background */}
-      <div
-        aria-hidden
-        className="fixed inset-0 -z-10 pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(circle, var(--border) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-          opacity: 0.7,
-        }}
-      />
-
       <ScrollProgressBar progress={scrollProgress} section={scrollSection} />
       <StickyHeader visible={scrolled} />
 
