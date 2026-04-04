@@ -7,15 +7,12 @@ type Props = {
   categoryLabel: string;
 };
 
-// Context-appropriate field label for the "published/presented at" line
 function getVenueLabel(category: string): string {
   if (category === 'publications') return 'published in';
   if (category === 'presentations') return 'presented at';
-  if (category === 'projects') return 'role';
-  return 'context';
+  return 'role';
 }
 
-// Human-readable type derived from topics
 function getItemType(item: ContentItem, category: string): string {
   const topics = item.topics.map((t) => t.toLowerCase());
   if (category === 'publications') {
@@ -37,8 +34,7 @@ function getItemType(item: ContentItem, category: string): string {
   return '';
 }
 
-type FieldRowProps = { label: string; value: string };
-function FieldRow({ label, value }: FieldRowProps) {
+function FieldRow({ label, value }: { label: string; value: string }) {
   return (
     <div
       style={{
@@ -48,7 +44,7 @@ function FieldRow({ label, value }: FieldRowProps) {
         marginBottom: '0.3rem',
       }}
     >
-      <span style={{ color: '#555' }}>{label}</span>
+      <span style={{ color: '#444' }}>{label}</span>
       <span style={{ color: '#cccccc' }}>{value}</span>
     </div>
   );
@@ -57,6 +53,7 @@ function FieldRow({ label, value }: FieldRowProps) {
 export default function TerminalItemPage({ item, category, categoryLabel }: Props) {
   const venueLabel = getVenueLabel(category);
   const itemType = getItemType(item, category);
+  const isNew = !!item.meta && item.meta.includes('2025');
 
   return (
     <main
@@ -72,10 +69,10 @@ export default function TerminalItemPage({ item, category, categoryLabel }: Prop
       {/* Title bar */}
       <div
         style={{
-          color: '#222',
+          color: '#1e1e1e',
           marginBottom: '2rem',
           paddingBottom: '0.75rem',
-          borderBottom: '1px solid #1c1c1c',
+          borderBottom: '1px solid #1a1a1a',
           fontSize: '0.7rem',
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
@@ -87,23 +84,20 @@ export default function TerminalItemPage({ item, category, categoryLabel }: Prop
         <span>timo diepers — {categoryLabel}</span>
         <Link
           href="/"
-          style={{
-            color: '#555',
-            fontSize: '0.7rem',
-            textDecoration: 'none',
-            letterSpacing: '0.05em',
-          }}
+          style={{ color: '#444', fontSize: '0.7rem', textDecoration: 'none', letterSpacing: '0.05em' }}
         >
           ← overview
         </Link>
       </div>
 
-      {/* Breadcrumb prompt */}
-      <div style={{ marginBottom: '1.5rem', color: '#444', fontSize: '0.8rem' }}>
-        {'>'} {categoryLabel} / {item.id}
+      {/* Breadcrumb */}
+      <div style={{ marginBottom: '1.5rem', fontSize: '0.8rem' }}>
+        <span className="prompt-gt">{'>'} </span>
+        <span style={{ color: '#333' }}>{categoryLabel} / </span>
+        <span style={{ color: '#555' }}>{item.id}</span>
       </div>
 
-      <div style={{ borderTop: '1px solid #1e1e1e', marginBottom: '1.75rem' }} />
+      <div style={{ borderTop: '1px solid #1a1a1a', marginBottom: '1.75rem' }} />
 
       {/* Title */}
       <div
@@ -112,18 +106,19 @@ export default function TerminalItemPage({ item, category, categoryLabel }: Prop
           fontSize: '1rem',
           lineHeight: 1.55,
           maxWidth: '72ch',
-          marginBottom: '1.75rem',
+          marginBottom: '0.4rem',
         }}
       >
         {item.title}
+        {isNew && <span className="row-new">[new]</span>}
       </div>
 
-      <div style={{ borderTop: '1px solid #1e1e1e', marginBottom: '1.75rem' }} />
+      <div style={{ borderTop: '1px solid #1a1a1a', margin: '1.5rem 0' }} />
 
-      {/* Structured fields */}
+      {/* Fields */}
       <div style={{ marginBottom: '1.75rem' }}>
-        {item.meta && <FieldRow label={venueLabel} value={item.meta} />}
-        {itemType && <FieldRow label="type" value={itemType} />}
+        {item.meta    && <FieldRow label={venueLabel} value={item.meta} />}
+        {itemType     && <FieldRow label="type"       value={itemType} />}
         {item.topics.length > 0 && (
           <FieldRow label="topics" value={item.topics.join(' · ')} />
         )}
@@ -131,7 +126,7 @@ export default function TerminalItemPage({ item, category, categoryLabel }: Prop
 
       {item.description && (
         <>
-          <div style={{ borderTop: '1px solid #1e1e1e', marginBottom: '1.75rem' }} />
+          <div style={{ borderTop: '1px solid #1a1a1a', marginBottom: '1.75rem' }} />
           <div
             style={{
               color: '#999',
@@ -147,31 +142,14 @@ export default function TerminalItemPage({ item, category, categoryLabel }: Prop
 
       {item.links.length > 0 && (
         <>
-          <div style={{ borderTop: '1px solid #1e1e1e', marginBottom: '1.75rem' }} />
+          <div style={{ borderTop: '1px solid #1a1a1a', marginBottom: '1.75rem' }} />
           <div style={{ marginBottom: '1.75rem' }}>
-            <div style={{ color: '#555', marginBottom: '0.6rem', fontSize: '0.8rem' }}>
-              links
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.4rem',
-                paddingLeft: '0.75rem',
-              }}
-            >
+            <div style={{ color: '#3a3a3a', marginBottom: '0.6rem', fontSize: '0.8rem' }}>links</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', paddingLeft: '0.75rem' }}>
               {item.links.map((link) => (
-                <div
-                  key={link.label}
-                  style={{ display: 'flex', gap: '0.75rem', alignItems: 'baseline', flexWrap: 'wrap' }}
-                >
-                  <span style={{ color: '#555', minWidth: '7rem' }}>[{link.label}]</span>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: '#4af626', wordBreak: 'break-all' }}
-                  >
+                <div key={link.label} style={{ display: 'flex', gap: '0.75rem', alignItems: 'baseline', flexWrap: 'wrap' }}>
+                  <span style={{ color: '#444', minWidth: '7rem' }}>[{link.label}]</span>
+                  <a href={link.href} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
                     {link.href}
                   </a>
                 </div>
@@ -181,22 +159,17 @@ export default function TerminalItemPage({ item, category, categoryLabel }: Prop
         </>
       )}
 
-      {/* Footer navigation */}
-      <div style={{ borderTop: '1px solid #1e1e1e', marginTop: '2rem', paddingTop: '1.5rem' }}>
-        <Link
-          href="/"
-          style={{ color: '#4af626', fontSize: '0.83rem' }}
-        >
-          ← back to overview
-        </Link>
-        <div style={{ marginTop: '1.25rem', color: '#444' }}>
-          {'>'}{' '}
+      {/* Footer */}
+      <div style={{ borderTop: '1px solid #1a1a1a', marginTop: '2rem', paddingTop: '1.5rem' }}>
+        <Link href="/">← back to overview</Link>
+        <div style={{ marginTop: '1.25rem' }}>
+          <span className="prompt-gt">{'>'} </span>
           <span
             style={{
               display: 'inline-block',
               width: '0.55em',
               height: '1.1em',
-              backgroundColor: '#4af626',
+              backgroundColor: 'var(--accent)',
               verticalAlign: 'text-bottom',
               marginLeft: '2px',
               animation: 'blink 1s step-end infinite',
