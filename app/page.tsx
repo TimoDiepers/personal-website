@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { publications, presentations, codingProjects, type ContentItem } from '@/lib/content';
 
-// ── Typewriter hook ──────────────────────────────────────────────────────────
+// ── Typewriter ───────────────────────────────────────────────────────────────
 function useTypewriter(text: string, speed = 70, startDelay = 400) {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
@@ -46,6 +46,18 @@ function DelayedBlock({ delay, children }: { delay: number; children: React.Reac
   return <div className="fade-in">{children}</div>;
 }
 
+// ── Filtering ────────────────────────────────────────────────────────────────
+function filterItems(items: ContentItem[], query: string): ContentItem[] {
+  if (!query.trim()) return items;
+  const q = query.toLowerCase();
+  return items.filter(
+    (item) =>
+      item.title.toLowerCase().includes(q) ||
+      item.topics.some((t) => t.toLowerCase().includes(q)) ||
+      (item.meta?.toLowerCase().includes(q))
+  );
+}
+
 // ── Type tag ─────────────────────────────────────────────────────────────────
 function getTypeTag(item: ContentItem, category: string): string {
   const t = item.topics[0]?.toLowerCase() ?? '';
@@ -69,13 +81,12 @@ function getTypeTag(item: ContentItem, category: string): string {
 }
 
 function isNew(item: ContentItem): boolean {
-  return !!item.meta && item.meta.includes('2025');
+  return !!item.meta?.includes('2025');
 }
 
 // ── Item row with hover preview ───────────────────────────────────────────────
 function ItemRow({ item, category }: { item: ContentItem; category: string }) {
   const tag = getTypeTag(item, category);
-  const showNew = isNew(item);
 
   return (
     <Link href={`/${category}/${item.id}`} className="terminal-row">
@@ -83,31 +94,39 @@ function ItemRow({ item, category }: { item: ContentItem; category: string }) {
         <span className="row-tag">[{tag}]</span>
         <span className="row-title" style={{ color: '#cccccc' }}>
           {item.title}
-          {showNew && <span className="row-new">[new]</span>}
+          {isNew(item) && <span className="row-new">[new]</span>}
         </span>
         <span className="terminal-row-meta">{item.meta}</span>
       </div>
-      {item.description && (
-        <div className="row-preview">{item.description}</div>
-      )}
+      {item.description && <div className="row-preview">{item.description}</div>}
     </Link>
   );
 }
 
-// ── Section ───────────────────────────────────────────────────────────────────
+// ── Terminal section ──────────────────────────────────────────────────────────
 function TerminalSection({
   command,
   subtitle,
-  items,
+  allItems,
+  filteredItems,
   category,
   delay,
+  isFiltering,
 }: {
   command: string;
   subtitle: string;
-  items: ContentItem[];
+  allItems: ContentItem[];
+  filteredItems: ContentItem[];
   category: string;
   delay: number;
+  isFiltering: boolean;
 }) {
+  if (isFiltering && filteredItems.length === 0) return null;
+
+  const countLabel = isFiltering
+    ? `${filteredItems.length} of ${allItems.length}`
+    : `${allItems.length} ${allItems.length === 1 ? 'item' : 'items'}`;
+
   return (
     <DelayedBlock delay={delay}>
       <div style={{ marginBottom: '2.25rem' }}>
@@ -115,14 +134,16 @@ function TerminalSection({
           <span className="prompt-gt">{'>'} </span>
           <span className="cmd-text">{command}</span>
           <span style={{ color: '#2a2a2a', marginLeft: '1.5rem', fontSize: '0.75rem' }}>
-            {items.length} {items.length === 1 ? 'item' : 'items'}
+            {countLabel}
           </span>
         </div>
-        <div style={{ color: '#323232', paddingLeft: '1.2rem', marginBottom: '0.75rem', fontSize: '0.78rem' }}>
-          {subtitle}
-        </div>
+        {!isFiltering && (
+          <div style={{ color: '#2e2e2e', paddingLeft: '1.2rem', marginBottom: '0.75rem', fontSize: '0.78rem' }}>
+            {subtitle}
+          </div>
+        )}
         <div style={{ paddingLeft: '0.25rem' }}>
-          {items.map((item) => (
+          {filteredItems.map((item) => (
             <ItemRow key={item.id} item={item} category={category} />
           ))}
         </div>
@@ -138,15 +159,10 @@ const THEMES: Theme[] = ['green', 'amber', 'cyan'];
 function ThemeSwitcher() {
   const [theme, setTheme] = useState<Theme>('green');
 
-  // Load saved theme on mount and apply it
   useEffect(() => {
     const saved = (localStorage.getItem('terminal-theme') ?? 'green') as Theme;
     setTheme(saved);
-    if (saved === 'green') {
-      document.documentElement.removeAttribute('data-theme');
-    } else {
-      document.documentElement.setAttribute('data-theme', saved);
-    }
+    if (saved !== 'green') document.documentElement.setAttribute('data-theme', saved);
   }, []);
 
   function applyTheme(t: Theme) {
@@ -167,7 +183,7 @@ function ThemeSwitcher() {
         <button
           key={t}
           onClick={() => applyTheme(t)}
-          className={`theme-btn ${theme === t ? 'active' : ''}`}
+          className={`theme-btn${theme === t ? ' active' : ''}`}
           aria-pressed={theme === t}
         >
           {theme === t ? `[● ${t}]` : `[○ ${t}]`}
@@ -188,6 +204,8 @@ const SOCIAL_LINKS = [
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   const [showContent, setShowContent] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
   const { displayed, done } = useTypewriter('about', 75, 300);
 
   useEffect(() => {
@@ -197,10 +215,33 @@ export default function Home() {
     }
   }, [done]);
 
-  const pubDelay   = 200;
-  const presDelay  = pubDelay  + 350;
-  const projDelay  = presDelay + 350;
-  const promptDelay = projDelay + 350;
+  // '/' focuses search, Escape clears it
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === '/' && (e.target as Element).tagName !== 'INPUT') {
+      e.preventDefault();
+      searchRef.current?.focus();
+    }
+    if (e.key === 'Escape') {
+      setSearchQuery('');
+      searchRef.current?.blur();
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  const isFiltering = searchQuery.trim().length > 0;
+  const filteredPubs   = filterItems(publications,    searchQuery);
+  const filteredPres   = filterItems(presentations,   searchQuery);
+  const filteredProj   = filterItems(codingProjects,  searchQuery);
+  const totalResults   = filteredPubs.length + filteredPres.length + filteredProj.length;
+
+  const pubDelay    = 200;
+  const presDelay   = pubDelay   + 350;
+  const projDelay   = presDelay  + 350;
+  const promptDelay = projDelay  + 350;
 
   return (
     <main
@@ -271,29 +312,75 @@ export default function Home() {
 
       {showContent && (
         <>
+          {/* Search bar */}
+          <DelayedBlock delay={100}>
+            <div style={{ marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', flexWrap: 'wrap' }}>
+                <span className="prompt-gt">{'>'} </span>
+                <span style={{ color: '#2a2a2a' }}>grep</span>
+                <input
+                  ref={searchRef}
+                  className="search-input"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="filter by title, topic, or venue  ·  press / to focus"
+                  aria-label="Search items"
+                  spellCheck={false}
+                />
+                {isFiltering && (
+                  <button
+                    onClick={() => { setSearchQuery(''); searchRef.current?.focus(); }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#444',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      fontSize: '0.85rem',
+                      padding: '0 0.2rem',
+                    }}
+                    aria-label="Clear search"
+                  >
+                    ×
+                  </button>
+                )}
+                {isFiltering && (
+                  <span style={{ color: '#333', fontSize: '0.78rem', marginLeft: '0.5rem' }}>
+                    {totalResults} result{totalResults !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+            </div>
+          </DelayedBlock>
+
           <TerminalSection
             command="publications"
             subtitle="peer-reviewed papers and technical reports"
-            items={publications}
+            allItems={publications}
+            filteredItems={filteredPubs}
             category="publications"
             delay={pubDelay}
+            isFiltering={isFiltering}
           />
           <TerminalSection
             command="presentations & talks"
             subtitle="conferences, workshops, and invited sessions"
-            items={presentations}
+            allItems={presentations}
+            filteredItems={filteredPres}
             category="presentations"
             delay={presDelay}
+            isFiltering={isFiltering}
           />
           <TerminalSection
             command="software & tools"
             subtitle="open-source packages and applications"
-            items={codingProjects}
+            allItems={codingProjects}
+            filteredItems={filteredProj}
             category="projects"
             delay={projDelay}
+            isFiltering={isFiltering}
           />
 
-          {/* Final prompt + theme switcher */}
           <DelayedBlock delay={promptDelay}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
               <ThemeSwitcher />
