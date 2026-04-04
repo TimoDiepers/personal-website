@@ -44,10 +44,33 @@ function DelayedBlock({ delay, children }: { delay: number; children: React.Reac
   return <div className="fade-in">{children}</div>;
 }
 
+// Derive a short human-readable type tag from topics + category
+function getTypeTag(item: ContentItem, category: string): string {
+  const t = item.topics[0]?.toLowerCase() ?? '';
+  if (category === 'publications') {
+    if (t.includes('focus report') || t.includes('report')) return 'report';
+    if (t.includes('software')) return 'software';
+    return 'journal';
+  }
+  if (category === 'presentations') {
+    if (t.includes('teaching')) return 'workshop';
+    if (t.includes('poster')) return 'poster';
+    if (t.includes('session')) return 'session';
+    return 'talk';
+  }
+  if (category === 'projects') {
+    if (t.includes('website')) return 'website';
+    if (t.includes('python')) return 'python pkg';
+    return 'tool';
+  }
+  return '';
+}
+
 function ItemRow({ item, category }: { item: ContentItem; category: string }) {
+  const tag = getTypeTag(item, category);
   return (
     <Link href={`/${category}/${item.id}`} className="terminal-row">
-      <span style={{ color: '#444', userSelect: 'none' }}>{'>'}</span>
+      <span className="row-tag">[{tag}]</span>
       <span className="row-title" style={{ color: '#cccccc' }}>
         {item.title}
       </span>
@@ -58,22 +81,32 @@ function ItemRow({ item, category }: { item: ContentItem; category: string }) {
 
 function TerminalSection({
   command,
+  subtitle,
   items,
   category,
   delay,
 }: {
   command: string;
+  subtitle: string;
   items: ContentItem[];
   category: string;
   delay: number;
 }) {
   return (
     <DelayedBlock delay={delay}>
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{ marginBottom: '0.6rem' }}>
-          <span style={{ color: '#444' }}>~/timo-diepers$ </span>
+      <div style={{ marginBottom: '2.25rem' }}>
+        {/* Section header */}
+        <div style={{ marginBottom: '0.25rem' }}>
+          <span style={{ color: '#444' }}>{'>'} </span>
           <span style={{ color: '#4af626' }}>{command}</span>
+          <span style={{ color: '#333', marginLeft: '1.5rem', fontSize: '0.75rem' }}>
+            {items.length} {items.length === 1 ? 'item' : 'items'}
+          </span>
         </div>
+        <div style={{ color: '#3a3a3a', paddingLeft: '1.2rem', marginBottom: '0.75rem', fontSize: '0.78rem' }}>
+          {subtitle}
+        </div>
+        {/* Items */}
         <div style={{ paddingLeft: '0.25rem' }}>
           {items.map((item) => (
             <ItemRow key={item.id} item={item} category={category} />
@@ -93,7 +126,7 @@ const SOCIAL_LINKS = [
 
 export default function Home() {
   const [showContent, setShowContent] = useState(false);
-  const { displayed, done } = useTypewriter('whoami', 70, 300);
+  const { displayed, done } = useTypewriter('about', 75, 300);
 
   useEffect(() => {
     if (done) {
@@ -118,7 +151,7 @@ export default function Home() {
         lineHeight: 1.7,
       }}
     >
-      {/* Terminal title bar */}
+      {/* Title bar */}
       <div
         style={{
           color: '#222',
@@ -133,20 +166,34 @@ export default function Home() {
         timo diepers — personal site
       </div>
 
-      {/* whoami command + output */}
-      <div style={{ marginBottom: '2rem' }}>
+      {/* About section */}
+      <div style={{ marginBottom: '2.25rem' }}>
         <div style={{ marginBottom: '0.75rem' }}>
-          <span style={{ color: '#444' }}>~/timo-diepers$ </span>
+          <span style={{ color: '#444' }}>{'>'} </span>
           <span style={{ color: '#4af626' }}>{displayed}</span>
           {!done && <span className="cursor" />}
         </div>
 
         {done && (
-          <div className="fade-in" style={{ lineHeight: 1.9 }}>
-            <div style={{ color: '#f0f0f0', fontSize: '1rem' }}>Timo Diepers</div>
-            <div style={{ color: '#999' }}>Research Associate @ RWTH Aachen University</div>
-            <div style={{ color: '#555' }}>
-              Life Cycle Assessment · Sustainability · Mathematical Optimization
+          <div className="fade-in" style={{ lineHeight: 1.9, paddingLeft: '1.2rem' }}>
+            <div style={{ color: '#f0f0f0', fontSize: '1rem', marginBottom: '0.1rem' }}>
+              Timo Diepers
+            </div>
+            <div style={{ color: '#888' }}>
+              Research Associate · RWTH Aachen University
+            </div>
+            <div
+              style={{
+                color: '#666',
+                marginTop: '0.6rem',
+                maxWidth: '58ch',
+                lineHeight: 1.75,
+                fontSize: '0.83rem',
+              }}
+            >
+              I explore methods for designing sustainable processes and systems
+              through Life Cycle Assessment and Mathematical Optimization.
+              Most of my work is open-source.
             </div>
             <div style={{ marginTop: '0.9rem', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
               {SOCIAL_LINKS.map(({ label, href }) => (
@@ -165,30 +212,32 @@ export default function Home() {
         )}
       </div>
 
-      {/* Content sections appear after whoami resolves */}
       {showContent && (
         <>
           <TerminalSection
-            command="ls publications/"
+            command="publications"
+            subtitle="peer-reviewed papers and technical reports"
             items={publications}
             category="publications"
             delay={pubDelay}
           />
           <TerminalSection
-            command="ls presentations/"
+            command="presentations & talks"
+            subtitle="conferences, workshops, and invited sessions"
             items={presentations}
             category="presentations"
             delay={presDelay}
           />
           <TerminalSection
-            command="ls projects/"
+            command="software & tools"
+            subtitle="open-source packages and applications"
             items={codingProjects}
             category="projects"
             delay={projDelay}
           />
           <DelayedBlock delay={promptDelay}>
             <div>
-              <span style={{ color: '#444' }}>~/timo-diepers$ </span>
+              <span style={{ color: '#444' }}>{'>'} </span>
               <span className="cursor" />
             </div>
           </DelayedBlock>

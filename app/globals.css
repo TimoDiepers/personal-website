@@ -74,14 +74,16 @@
 
 .terminal-row {
   display: grid;
-  grid-template-columns: 2.5rem 1fr;
+  /* [type-tag] title */
+  grid-template-columns: 7.5rem 1fr;
   gap: 0;
-  padding: 0.2rem 0.4rem;
+  padding: 0.25rem 0.4rem;
   border-radius: 2px;
   cursor: pointer;
   text-decoration: none !important;
   color: inherit !important;
   transition: background-color 0.1s ease;
+  align-items: baseline;
 }
 
 .terminal-row:hover {
@@ -92,19 +94,34 @@
   color: var(--white);
 }
 
+/* Type tag badge */
+.row-tag {
+  color: #3a5a3a;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  padding-right: 0.5rem;
+}
+
+.terminal-row:hover .row-tag {
+  color: var(--green-dim);
+}
+
+/* Meta column — hidden on small screens, appears at wider widths */
 .terminal-row-meta {
   display: none;
 }
 
 @media (min-width: 700px) {
   .terminal-row {
-    grid-template-columns: 2.5rem 1fr auto;
+    /* [type-tag] title meta */
+    grid-template-columns: 7.5rem 1fr auto;
   }
   .terminal-row-meta {
     display: block;
-    color: var(--muted);
+    color: #3a3a3a;
     padding-left: 1.5rem;
     white-space: nowrap;
+    font-size: 0.8rem;
   }
 }
 
