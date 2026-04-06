@@ -11,7 +11,8 @@ const getYear = (item: ContentItem) => {
     return '—';
   }
 
-  const matches = item.meta.match(/\b\d{4}\b/g);
+  // `meta` contains venue/context text; keep only plausible year tokens.
+  const matches = item.meta.match(/\b(19\d{2}|20\d{2}|2100)\b/g);
   const validYears = matches?.filter((value) => {
     const year = Number(value);
     return year >= 1900 && year <= 2100;
@@ -65,7 +66,7 @@ const OverviewSection = ({
             );
           }
 
-          const primaryLink = item.links[0];
+          const primaryLink = item.links?.[0];
 
           if (!primaryLink) {
             return (
