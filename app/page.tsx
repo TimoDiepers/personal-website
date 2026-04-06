@@ -11,8 +11,9 @@ const getYear = (item: ContentItem) => {
     return '—';
   }
 
-  // `meta` contains venue/context text; keep only plausible year tokens.
-  const matches = item.meta.match(/\b(19\d{2}|20\d{2}|2100)\b/g);
+  // Heuristic fallback: `meta` is expected to be a venue/context string that may include one year.
+  // We extract the last plausible year token when no explicit `year` field exists.
+  const matches = item.meta.match(/\b(19\d{2}|2[01]\d{2})\b/g);
   return matches?.at(-1) ?? '—';
 };
 
