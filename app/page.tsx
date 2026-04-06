@@ -11,12 +11,16 @@ const getYear = (item: ContentItem) => {
     return '—';
   }
 
-  const match = item.meta.match(/\b\d{4}\b/g);
-  return match?.at(-1) ?? '—';
+  const matches = item.meta.match(/\b\d{4}\b/g);
+  const validYears = matches?.filter((value) => {
+    const year = Number(value);
+    return year >= 1900 && year <= 2100;
+  });
+  return validYears?.at(-1) ?? '—';
 };
 
 const getProseLabel = (item: ContentItem, fallback: string) => {
-  return item.proseLabel ?? item.topics[0]?.toLowerCase() ?? fallback;
+  return item.proseLabel ?? item.topics?.[0]?.toLowerCase() ?? fallback;
 };
 
 const OverviewSection = ({
