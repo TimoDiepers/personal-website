@@ -129,34 +129,21 @@
   border-left-color: var(--accent-muted);
 }
 
-/* meta line: type · year on left, venue on right */
+/* meta line: type · year */
 .item-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1.5rem;
-  margin-bottom: 0.4rem;
-  font-size: 0.7rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.68rem;
   line-height: 1;
+  color: #2e2e2e;
 }
 
-.item-tag  { color: var(--accent-muted); }
-.item-year { color: #2e2e2e; }
+.item-tag { color: var(--accent-muted); }
 
 .item-new {
   color: var(--accent);
   opacity: 0.6;
   margin-left: 0.35rem;
-  font-size: 0.68rem;
-}
-
-.item-venue {
-  color: #252525;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: right;
-  min-width: 0;
+  font-size: 0.66rem;
 }
 
 /* title */
@@ -193,8 +180,8 @@
   color: #555;
   font-family: inherit;
   font-size: 0.8rem;
-  width: 100%;
-  max-width: 22rem;
+  width: 14rem;
+  max-width: 100%;
   padding: 0 0 0.15rem;
   caret-color: var(--accent);
   transition: border-color 0.15s ease, color 0.15s ease;
@@ -205,6 +192,24 @@
 .search-input:focus {
   border-bottom-color: var(--accent-dim);
   color: #999;
+}
+
+/* ── Footer layout ─────────────────────────────────── */
+.page-footer {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 480px) {
+  .page-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 
 /* ── Theme switcher ────────────────────────────────── */

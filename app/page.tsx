@@ -31,10 +31,6 @@ function extractYear(meta?: string) {
   return meta?.match(/\b(20\d{2})\b/)?.[1] ?? '';
 }
 
-function stripYear(meta?: string) {
-  return meta?.replace(/\s*·?\s*\b20\d{2}\b\s*$/, '').trim() ?? '';
-}
-
 function isNew(item: ContentItem) {
   return !!item.meta?.includes('2025');
 }
@@ -53,19 +49,15 @@ function filterItems(items: ContentItem[], q: string) {
 // ── Item card ────────────────────────────────────────────────────────────────
 
 function ItemCard({ item, category }: { item: ContentItem; category: string }) {
-  const tag   = getTypeTag(item, category);
-  const year  = extractYear(item.meta);
-  const venue = stripYear(item.meta);
+  const tag  = getTypeTag(item, category);
+  const year = extractYear(item.meta);
 
   return (
     <Link href={`/${category}/${item.id}`} className="item-card">
       <div className="item-meta">
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 0 }}>
-          <span className="item-tag">{tag}</span>
-          {year && <span className="item-year"> · {year}</span>}
-          {isNew(item) && <span className="item-new">[new]</span>}
-        </div>
-        {venue && <span className="item-venue">{venue}</span>}
+        <span className="item-tag">{tag}</span>
+        {year && <span className="item-year"> · {year}</span>}
+        {isNew(item) && <span className="item-new">[new]</span>}
       </div>
       <div className="item-title">{item.title}</div>
       {item.description && <div className="item-desc">{item.description}</div>}
@@ -239,18 +231,7 @@ export default function Home() {
       </div>
 
       {/* ── Footer ─────────────────────────────────── */}
-      <footer
-        style={{
-          marginTop: '3.5rem',
-          paddingTop: '1.5rem',
-          borderTop: '1px solid #1a1a1a',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-        }}
-      >
+      <footer className="page-footer">
         {/* Search */}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
           <input
