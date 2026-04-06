@@ -1,24 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { presentations, type ContentItem } from '@/lib/content';
-
-const getYear = (item: ContentItem) => {
-  if (item.year) {
-    return item.year;
-  }
-
-  if (!item.meta) {
-    return '—';
-  }
-
-  const matches = item.meta.match(/\b(19\d{2}|2[01]\d{2})\b/g);
-  return matches?.at(-1) ?? '—';
-};
-
-const getProseLabel = (item: ContentItem) => {
-  return item.proseLabel ?? item.topics?.[0]?.toLowerCase() ?? 'talk';
-};
+import { presentations } from '@/lib/content';
+import { getItemProseLabel, getItemYear } from '@/lib/content-helpers';
 
 type TalkDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -41,7 +25,7 @@ const TalkDetailPage = async ({ params }: TalkDetailPageProps) => {
       <article className="space-y-4">
         <h1 className="text-xl">{talk.title}</h1>
         <p className="text-sm">
-          {getYear(talk)} · {getProseLabel(talk)}
+          {getItemYear(talk)} · {getItemProseLabel(talk, 'talk')}
         </p>
         <p>{talk.description}</p>
         {talk.meta ? <p className="text-sm">{talk.meta}</p> : null}

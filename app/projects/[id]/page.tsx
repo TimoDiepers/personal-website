@@ -1,24 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { codingProjects, type ContentItem } from '@/lib/content';
-
-const getYear = (item: ContentItem) => {
-  if (item.year) {
-    return item.year;
-  }
-
-  if (!item.meta) {
-    return '—';
-  }
-
-  const matches = item.meta.match(/\b(19\d{2}|2[01]\d{2})\b/g);
-  return matches?.at(-1) ?? '—';
-};
-
-const getProseLabel = (item: ContentItem) => {
-  return item.proseLabel ?? item.topics?.[0]?.toLowerCase() ?? 'project';
-};
+import { codingProjects } from '@/lib/content';
+import { getItemProseLabel, getItemYear } from '@/lib/content-helpers';
 
 type ProjectDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -41,7 +25,7 @@ const ProjectDetailPage = async ({ params }: ProjectDetailPageProps) => {
       <article className="space-y-4">
         <h1 className="text-xl">{project.title}</h1>
         <p className="text-sm">
-          {getYear(project)} · {getProseLabel(project)}
+          {getItemYear(project)} · {getItemProseLabel(project, 'project')}
         </p>
         <p>{project.description}</p>
         {project.meta ? <p className="text-sm">{project.meta}</p> : null}

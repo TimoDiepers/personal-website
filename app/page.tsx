@@ -1,34 +1,7 @@
 import Link from 'next/link';
 
 import { codingProjects, presentations, publications, type ContentItem } from '@/lib/content';
-
-const getYear = (item: ContentItem) => {
-  if (item.year) {
-    return item.year;
-  }
-
-  if (!item.meta) {
-    return '—';
-  }
-
-  // Heuristic fallback: `meta` is expected to be a venue/context string that may include one year.
-  // We extract the last plausible year token when no explicit `year` field exists.
-  const matches = item.meta.match(/\b(19\d{2}|2[01]\d{2})\b/g);
-  return matches?.at(-1) ?? '—';
-};
-
-const getProseLabel = (item: ContentItem, fallback: string) => {
-  return item.proseLabel ?? item.topics?.[0]?.toLowerCase() ?? fallback;
-};
-
-const getYearValue = (item: ContentItem) => {
-  const year = Number(getYear(item));
-  return Number.isFinite(year) ? year : -Infinity;
-};
-
-const orderByDateDesc = (items: ContentItem[]) => {
-  return [...items].sort((a, b) => getYearValue(b) - getYearValue(a));
-};
+import { getItemProseLabel, getItemYear, orderByDateDesc } from '@/lib/content-helpers';
 
 const OverviewSection = ({
   id,
@@ -53,10 +26,10 @@ const OverviewSection = ({
           const body = (
             <>
               <p>{item.title}</p>
-              <p className="text-xs">
-                {getYear(item)} · {getProseLabel(item, fallbackLabel)}
-              </p>
-            </>
+                <p className="text-xs">
+                  {getItemYear(item)} · {getItemProseLabel(item, fallbackLabel)}
+                </p>
+              </>
           );
 
           if (detailPath) {
