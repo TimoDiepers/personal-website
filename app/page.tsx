@@ -3,6 +3,13 @@ import Link from 'next/link';
 import { codingProjects, presentations, publications, type ContentItem } from '@/lib/content';
 import { getItemProseLabel, getItemYear, orderByDateDesc } from '@/lib/content-helpers';
 
+const socialLinks = [
+  { href: 'mailto:timo.diepers@rwth-aachen.de', label: 'Mail' },
+  { href: 'https://www.linkedin.com/in/timo-diepers/', label: 'LinkedIn' },
+  { href: 'https://github.com/TimoDiepers', label: 'GitHub' },
+  { href: 'https://orcid.org/0009-0002-8566-8618', label: 'ORCID' },
+];
+
 const OverviewSection = ({
   id,
   title,
@@ -18,7 +25,7 @@ const OverviewSection = ({
 }) => {
   return (
     <section aria-labelledby={id} className="space-y-3">
-      <h2 id={id} className="text-sm uppercase tracking-wide">
+      <h2 id={id} className="border-b border-foreground pb-1 text-sm uppercase tracking-[0.2em]">
         {title}
       </h2>
       <ul className="space-y-2">
@@ -26,10 +33,10 @@ const OverviewSection = ({
           const body = (
             <>
               <p>{item.title}</p>
-                <p className="text-xs">
-                  {getItemYear(item)} · {getItemProseLabel(item, fallbackLabel)}
-                </p>
-              </>
+              <p className="text-xs">
+                {getItemYear(item)} · {getItemProseLabel(item, fallbackLabel)}
+              </p>
+            </>
           );
 
           if (detailPath) {
@@ -78,7 +85,20 @@ const HomePage = () => {
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-10 px-6 py-10">
       <header className="space-y-2">
         <h1 className="text-2xl">Timo Diepers</h1>
-        <p className="text-sm">Overview</p>
+        <p className="text-sm">Overview / research notes / software</p>
+        <nav aria-label="Social links" className="flex flex-wrap gap-2 pt-1 text-xs">
+          {socialLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+              rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+              className="border border-foreground px-2 py-1 hover:bg-foreground hover:text-background"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
       </header>
 
       <OverviewSection
@@ -104,6 +124,10 @@ const HomePage = () => {
         fallbackLabel="project"
         detailPath="/projects"
       />
+
+      <footer className="border-t border-foreground pt-4 text-xs">
+        <p>[ crafted with low noise, high signal ]</p>
+      </footer>
     </main>
   );
 };
