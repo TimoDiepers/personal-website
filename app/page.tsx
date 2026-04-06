@@ -13,11 +13,7 @@ const getYear = (item: ContentItem) => {
 
   // `meta` contains venue/context text; keep only plausible year tokens.
   const matches = item.meta.match(/\b(19\d{2}|20\d{2}|2100)\b/g);
-  const validYears = matches?.filter((value) => {
-    const year = Number(value);
-    return year >= 1900 && year <= 2100;
-  });
-  return validYears?.at(-1) ?? '—';
+  return matches?.at(-1) ?? '—';
 };
 
 const getProseLabel = (item: ContentItem, fallback: string) => {
