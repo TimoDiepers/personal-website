@@ -21,6 +21,15 @@ const getProseLabel = (item: ContentItem, fallback: string) => {
   return item.proseLabel ?? item.topics?.[0]?.toLowerCase() ?? fallback;
 };
 
+const getYearValue = (item: ContentItem) => {
+  const year = Number(getYear(item));
+  return Number.isFinite(year) ? year : -Infinity;
+};
+
+const orderByDateDesc = (items: ContentItem[]) => {
+  return [...items].sort((a, b) => getYearValue(b) - getYearValue(a));
+};
+
 const OverviewSection = ({
   id,
   title,
@@ -40,7 +49,7 @@ const OverviewSection = ({
         {title}
       </h2>
       <ul className="space-y-2">
-        {items.map((item) => {
+        {orderByDateDesc(items).map((item) => {
           const body = (
             <>
               <p>{item.title}</p>
@@ -112,6 +121,7 @@ const HomePage = () => {
         title="Talks"
         items={presentations}
         fallbackLabel="talk"
+        detailPath="/talks"
       />
 
       <OverviewSection
@@ -119,6 +129,7 @@ const HomePage = () => {
         title="Projects"
         items={codingProjects}
         fallbackLabel="project"
+        detailPath="/projects"
       />
     </main>
   );
