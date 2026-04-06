@@ -83,12 +83,12 @@ const OverviewSection = ({
   );
 };
 
-const getFilteredItems = (items: ContentItem[], topic: string | null) => {
-  if (!topic) {
+const getFilteredItems = (items: ContentItem[], activeTopics: string[]) => {
+  if (activeTopics.length === 0) {
     return items;
   }
 
-  return items.filter((item) => item.topics.includes(topic));
+  return items.filter((item) => activeTopics.some((topic) => item.topics.includes(topic)));
 };
 
 const allTopics = Array.from(
@@ -96,11 +96,26 @@ const allTopics = Array.from(
 ).sort((a, b) => a.localeCompare(b));
 
 const HomeOverview = () => {
-  const [topic, setTopic] = useState<string | null>(null);
+  const [activeTopics, setActiveTopics] = useState<string[]>([]);
 
-  const filteredPublications = useMemo(() => getFilteredItems(publications, topic), [topic]);
-  const filteredPresentations = useMemo(() => getFilteredItems(presentations, topic), [topic]);
-  const filteredProjects = useMemo(() => getFilteredItems(codingProjects, topic), [topic]);
+  const filteredPublications = useMemo(
+    () => getFilteredItems(publications, activeTopics),
+    [activeTopics],
+  );
+  const filteredPresentations = useMemo(
+    () => getFilteredItems(presentations, activeTopics),
+    [activeTopics],
+  );
+  const filteredProjects = useMemo(
+    () => getFilteredItems(codingProjects, activeTopics),
+    [activeTopics],
+  );
+
+  const toggleTopic = (topic: string) => {
+    setActiveTopics((current) =>
+      current.includes(topic) ? current.filter((activeTopic) => activeTopic !== topic) : [...current, topic],
+    );
+  };
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-10 px-6 py-10">
@@ -110,25 +125,27 @@ const HomeOverview = () => {
         <nav aria-label="Topic filters" className="flex flex-wrap gap-2 pt-1 text-xs">
           <button
             type="button"
-            onClick={() => setTopic(null)}
-            aria-pressed={!topic}
+            onClick={() => setActiveTopics([])}
+            aria-pressed={activeTopics.length === 0}
             className={`border border-foreground px-2 py-1 hover:bg-foreground hover:text-background ${
-              !topic ? 'bg-foreground text-background' : ''
+              activeTopics.length === 0 ? 'bg-foreground text-background ring-1 ring-foreground ring-offset-1' : ''
             }`}
           >
             All
           </button>
           {allTopics.map((filterTopic) => {
-            const isActive = topic === filterTopic;
+            const isActive = activeTopics.includes(filterTopic);
 
             return (
               <button
                 type="button"
                 key={filterTopic}
-                onClick={() => setTopic(isActive ? null : filterTopic)}
+                onClick={() => toggleTopic(filterTopic)}
                 aria-pressed={isActive}
-                className={`border border-foreground px-2 py-1 hover:bg-foreground hover:text-background ${
-                  isActive ? 'bg-foreground text-background' : ''
+                className={`border px-2 py-1 hover:bg-foreground hover:text-background ${
+                  isActive
+                    ? 'border-foreground bg-foreground text-background ring-1 ring-foreground ring-offset-1'
+                    : 'border-foreground'
                 }`}
               >
                 {filterTopic}
