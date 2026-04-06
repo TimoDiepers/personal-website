@@ -7,6 +7,10 @@ type ProjectDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
+export const dynamicParams = false;
+
+export const generateStaticParams = () => codingProjects.map((item) => ({ id: item.id }));
+
 const ProjectDetailPage = async ({ params }: ProjectDetailPageProps) => {
   const { id } = await params;
   const project = codingProjects.find((item) => item.id === id);

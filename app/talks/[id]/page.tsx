@@ -7,6 +7,10 @@ type TalkDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
+export const dynamicParams = false;
+
+export const generateStaticParams = () => presentations.map((item) => ({ id: item.id }));
+
 const TalkDetailPage = async ({ params }: TalkDetailPageProps) => {
   const { id } = await params;
   const talk = presentations.find((item) => item.id === id);
