@@ -14,6 +14,8 @@ export type ContentItem = {
   imageLight?: string;
   imageDark?: string;
   featured?: boolean;
+  year?: string;
+  proseLabel?: string;
 };
 
 export const publications: ContentItem[] = [
@@ -29,6 +31,8 @@ export const publications: ContentItem[] = [
       { label: 'Code', href: 'https://github.com/brightway-lca/bw_timex/blob/main/notebooks/paper_case_study.ipynb' },
     ],
     featured: true,
+    year: '2025',
+    proseLabel: 'journal paper',
   },
   {
     id: 'welding',
@@ -41,6 +45,8 @@ export const publications: ContentItem[] = [
       { label: 'Report', href: 'https://publications.rwth-aachen.de/record/1011748' },
     ],
     featured: true,
+    year: '2025',
+    proseLabel: 'focus report',
   },  
   {
     id: 'timex-joss-paper',
@@ -54,6 +60,8 @@ export const publications: ContentItem[] = [
       { label: 'Package', href: 'https://github.com/brightway-lca/bw_timex?tab=readme-ov-file' },
     ],
     featured: false,
+    year: '2025',
+    proseLabel: 'software paper',
   },
 ];
 
