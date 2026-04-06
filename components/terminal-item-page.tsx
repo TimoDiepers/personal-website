@@ -1,192 +1,109 @@
 import Link from 'next/link';
 import type { ContentItem } from '@/lib/content';
 
-type Props = {
-  item: ContentItem;
-  category: string;
-  categoryLabel: string;
-};
-
 function getVenueLabel(category: string) {
-  if (category === 'publications') return 'published in';
+  if (category === 'publications')  return 'published in';
   if (category === 'presentations') return 'presented at';
   return 'role';
 }
 
 function getItemType(item: ContentItem, category: string): string {
-  const topics = item.topics.map((t) => t.toLowerCase());
+  const t = item.topics.map(x => x.toLowerCase());
   if (category === 'publications') {
-    if (topics.some((t) => t.includes('report')))   return 'Technical Report';
-    if (topics.some((t) => t.includes('software'))) return 'Software Paper';
+    if (t.some(x => x.includes('report')))   return 'Technical Report';
+    if (t.some(x => x.includes('software'))) return 'Software Paper';
     return 'Journal Paper';
   }
   if (category === 'presentations') {
-    if (topics.some((t) => t.includes('teaching'))) return 'Teaching Workshop';
-    if (topics.some((t) => t.includes('poster')))   return 'Poster Presentation';
-    if (topics.some((t) => t.includes('session')))  return 'Invited Session';
+    if (t.some(x => x.includes('teaching'))) return 'Teaching Workshop';
+    if (t.some(x => x.includes('poster')))   return 'Poster Presentation';
+    if (t.some(x => x.includes('session')))  return 'Invited Session';
     return 'Conference Talk';
   }
   if (category === 'projects') {
-    if (topics.some((t) => t.includes('webapp') || t.includes('web app'))) return 'Web Application';
-    if (topics.some((t) => t.includes('website'))) return 'Website';
+    if (t.some(x => x.includes('webapp') || x.includes('web app'))) return 'Web Application';
+    if (t.some(x => x.includes('website'))) return 'Website';
     return 'Software Package';
   }
   return '';
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '9rem 1fr',
-        gap: '0 0.75rem',
-        marginBottom: '0.3rem',
-        fontSize: '0.8rem',
-      }}
-    >
-      <span style={{ color: '#383838' }}>{label}</span>
-      <span style={{ color: '#888' }}>{value}</span>
-    </div>
-  );
-}
-
-export default function TerminalItemPage({ item, category, categoryLabel }: Props) {
-  const isNew = !!item.meta?.includes('2025');
-  const itemType = getItemType(item, category);
-  const venueLabel = getVenueLabel(category);
+export default function TerminalItemPage({ item, category, categoryLabel }: {
+  item: ContentItem;
+  category: string;
+  categoryLabel: string;
+}) {
+  const isNew = item.meta?.includes('2025');
 
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        padding: 'clamp(2rem, 6vw, 4rem) clamp(1.25rem, 4vw, 2.5rem)',
-        maxWidth: '680px',
-        margin: '0 auto',
-        fontSize: '0.875rem',
-        lineHeight: 1.7,
-      }}
-    >
-      {/* ── Nav ──────────────────────────────────────── */}
-      <div
-        style={{
-          marginBottom: '3rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'baseline',
-          fontSize: '0.72rem',
-          color: '#333',
-        }}
-      >
-        <span style={{ letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          {categoryLabel}
-        </span>
-        <Link href="/" style={{ color: '#383838', fontSize: '0.75rem' }}>
-          ← overview
-        </Link>
+    <main style={{ maxWidth: '640px', margin: '0 auto', padding: 'clamp(2rem, 6vw, 3.5rem) 1.25rem' }}>
+
+      {/* Nav */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', color: '#404040' }}>
+        <span style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}>{categoryLabel}</span>
+        <Link href="/" style={{ color: '#404040' }}>← overview</Link>
       </div>
 
-      {/* ── Title ────────────────────────────────────── */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h1
-          style={{
-            color: '#e0e0e0',
-            fontSize: '0.95rem',
-            fontWeight: 'normal',
-            lineHeight: 1.5,
-            margin: 0,
-          }}
-        >
-          {item.title}
-          {isNew && (
-            <span style={{ color: 'var(--accent)', opacity: 0.6, fontSize: '0.7rem', marginLeft: '0.5rem' }}>
-              [new]
-            </span>
-          )}
-        </h1>
-      </div>
+      {/* Title */}
+      <h1 style={{ color: '#e0e0e0', fontSize: 'inherit', fontWeight: 600, lineHeight: 1.5, margin: '0 0 0.25rem' }}>
+        {item.title}
+        {isNew && <span style={{ color: 'var(--accent)', fontWeight: 'normal', opacity: 0.6, marginLeft: '0.5rem' }}>[new]</span>}
+      </h1>
 
-      <hr style={{ border: 'none', borderTop: '1px solid #1a1a1a', margin: '1.75rem 0' }} />
+      <hr style={{ border: 'none', borderTop: '1px solid #1e1e1e', margin: '1.5rem 0' }} />
 
-      {/* ── Meta ─────────────────────────────────────── */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        {item.meta    && <Row label={venueLabel} value={item.meta} />}
-        {itemType     && <Row label="type"       value={itemType} />}
+      {/* Meta */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        {item.meta && (
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.2rem' }}>
+            <span style={{ color: '#404040', minWidth: '8rem' }}>{getVenueLabel(category)}</span>
+            <span style={{ color: '#888' }}>{item.meta}</span>
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.2rem' }}>
+          <span style={{ color: '#404040', minWidth: '8rem' }}>type</span>
+          <span style={{ color: '#888' }}>{getItemType(item, category)}</span>
+        </div>
         {item.topics.length > 0 && (
-          <Row label="topics" value={item.topics.join(' · ')} />
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <span style={{ color: '#404040', minWidth: '8rem' }}>topics</span>
+            <span style={{ color: '#888' }}>{item.topics.join(' · ')}</span>
+          </div>
         )}
       </div>
 
-      {/* ── Description ──────────────────────────────── */}
+      {/* Description */}
       {item.description && (
         <>
-          <hr style={{ border: 'none', borderTop: '1px solid #1a1a1a', margin: '1.75rem 0' }} />
-          <p
-            style={{
-              color: '#666',
-              fontSize: '0.825rem',
-              lineHeight: 1.85,
-              maxWidth: '62ch',
-              margin: '0 0 1.75rem',
-            }}
-          >
+          <hr style={{ border: 'none', borderTop: '1px solid #1e1e1e', margin: '1.5rem 0' }} />
+          <p style={{ color: '#666', maxWidth: '58ch', lineHeight: 1.85, margin: '0 0 1.5rem' }}>
             {item.description}
           </p>
         </>
       )}
 
-      {/* ── Links ────────────────────────────────────── */}
+      {/* Links */}
       {item.links.length > 0 && (
         <>
-          <hr style={{ border: 'none', borderTop: '1px solid #1a1a1a', margin: '1.75rem 0' }} />
-          <div>
-            <div style={{ color: '#333', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-              links
+          <hr style={{ border: 'none', borderTop: '1px solid #1e1e1e', margin: '1.5rem 0' }} />
+          <div style={{ color: '#404040', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>links</div>
+          {item.links.map(link => (
+            <div key={link.label} style={{ display: 'flex', gap: '1rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+              <span style={{ color: '#404040', minWidth: '8rem' }}>{link.label}</span>
+              <a href={link.href} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
+                {link.href}
+              </a>
             </div>
-            {item.links.map((link) => (
-              <div key={link.label} style={{ marginBottom: '0.4rem', fontSize: '0.8rem' }}>
-                <span style={{ color: '#383838', display: 'inline-block', minWidth: '7rem' }}>
-                  {link.label}
-                </span>
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: 'var(--accent)', wordBreak: 'break-all' }}
-                >
-                  {link.href}
-                </a>
-              </div>
-            ))}
-          </div>
+          ))}
         </>
       )}
 
-      {/* ── Back ─────────────────────────────────────── */}
-      <div
-        style={{
-          marginTop: '3.5rem',
-          paddingTop: '1.5rem',
-          borderTop: '1px solid #1a1a1a',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Link href="/" style={{ color: '#555', fontSize: '0.8rem' }}>
-          ← back to overview
-        </Link>
-        <span
-          style={{
-            display: 'inline-block',
-            width: '0.5em',
-            height: '0.85em',
-            backgroundColor: 'var(--accent)',
-            opacity: 0.6,
-            animation: 'blink 1.1s step-end infinite',
-          }}
-        />
+      {/* Back */}
+      <div style={{ marginTop: '3rem', paddingTop: '1.25rem', borderTop: '1px solid #1e1e1e', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Link href="/" style={{ color: '#555' }}>← back to overview</Link>
+        <span className="cursor" />
       </div>
+
     </main>
   );
 }
