@@ -28,6 +28,9 @@ function getItemType(item: ContentItem, category: string): string {
   return '';
 }
 
+const dim: React.CSSProperties = { opacity: 0.4 };
+const row: React.CSSProperties = { display: 'flex', gap: '1rem', marginBottom: '0.2rem', flexWrap: 'wrap' };
+
 export default function TerminalItemPage({ item, category, categoryLabel }: {
   item: ContentItem;
   category: string;
@@ -39,13 +42,13 @@ export default function TerminalItemPage({ item, category, categoryLabel }: {
     <main style={{ maxWidth: '640px', margin: '0 auto', padding: 'clamp(2rem, 6vw, 3.5rem) 1.25rem' }}>
 
       {/* Nav */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', color: '#404040' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', ...dim }}>
         <span style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}>{categoryLabel}</span>
-        <Link href="/" style={{ color: '#404040' }}>← overview</Link>
+        <Link href="/" style={{ color: 'inherit' }}>← overview</Link>
       </div>
 
       {/* Title */}
-      <h1 style={{ color: '#e0e0e0', fontSize: 'inherit', fontWeight: 600, lineHeight: 1.5, margin: '0 0 0.25rem' }}>
+      <h1 style={{ fontSize: 'inherit', fontWeight: 600, lineHeight: 1.5, margin: '0 0 0.25rem' }}>
         {item.title}
         {isNew && <span style={{ color: 'var(--accent)', fontWeight: 'normal', opacity: 0.6, marginLeft: '0.5rem' }}>[new]</span>}
       </h1>
@@ -53,21 +56,21 @@ export default function TerminalItemPage({ item, category, categoryLabel }: {
       <hr style={{ border: 'none', borderTop: '1px solid #1e1e1e', margin: '1.5rem 0' }} />
 
       {/* Meta */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ ...dim, marginBottom: '1.5rem' }}>
         {item.meta && (
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.2rem' }}>
-            <span style={{ color: '#404040', minWidth: '8rem' }}>{getVenueLabel(category)}</span>
-            <span style={{ color: '#888' }}>{item.meta}</span>
+          <div style={row}>
+            <span style={{ minWidth: '8rem' }}>{getVenueLabel(category)}</span>
+            <span>{item.meta}</span>
           </div>
         )}
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.2rem' }}>
-          <span style={{ color: '#404040', minWidth: '8rem' }}>type</span>
-          <span style={{ color: '#888' }}>{getItemType(item, category)}</span>
+        <div style={row}>
+          <span style={{ minWidth: '8rem' }}>type</span>
+          <span>{getItemType(item, category)}</span>
         </div>
         {item.topics.length > 0 && (
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <span style={{ color: '#404040', minWidth: '8rem' }}>topics</span>
-            <span style={{ color: '#888' }}>{item.topics.join(' · ')}</span>
+          <div style={row}>
+            <span style={{ minWidth: '8rem' }}>topics</span>
+            <span>{item.topics.join(' · ')}</span>
           </div>
         )}
       </div>
@@ -76,7 +79,7 @@ export default function TerminalItemPage({ item, category, categoryLabel }: {
       {item.description && (
         <>
           <hr style={{ border: 'none', borderTop: '1px solid #1e1e1e', margin: '1.5rem 0' }} />
-          <p style={{ color: '#666', maxWidth: '58ch', lineHeight: 1.85, margin: '0 0 1.5rem' }}>
+          <p style={{ ...dim, maxWidth: '58ch', lineHeight: 1.85, margin: '0 0 1.5rem' }}>
             {item.description}
           </p>
         </>
@@ -86,10 +89,10 @@ export default function TerminalItemPage({ item, category, categoryLabel }: {
       {item.links.length > 0 && (
         <>
           <hr style={{ border: 'none', borderTop: '1px solid #1e1e1e', margin: '1.5rem 0' }} />
-          <div style={{ color: '#404040', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>links</div>
+          <div style={{ ...dim, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>links</div>
           {item.links.map(link => (
-            <div key={link.label} style={{ display: 'flex', gap: '1rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
-              <span style={{ color: '#404040', minWidth: '8rem' }}>{link.label}</span>
+            <div key={link.label} style={{ ...row, opacity: 1 }}>
+              <span style={{ ...dim, minWidth: '8rem' }}>{link.label}</span>
               <a href={link.href} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
                 {link.href}
               </a>
@@ -100,7 +103,7 @@ export default function TerminalItemPage({ item, category, categoryLabel }: {
 
       {/* Back */}
       <div style={{ marginTop: '3rem', paddingTop: '1.25rem', borderTop: '1px solid #1e1e1e', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/" style={{ color: '#555' }}>← back to overview</Link>
+        <Link href="/" style={{ color: 'inherit', ...dim }}>← back to overview</Link>
         <span className="cursor" />
       </div>
 

@@ -4,10 +4,7 @@
 :root {
   --bg:     #0c0c0c;
   --fg:     #aaaaaa;
-  --title:  #e0e0e0;
-  --dim:    #404040;
   --border: #1e1e1e;
-  --hover:  #111111;
   --accent: #4af626;
 }
 :root[data-theme="amber"] { --accent: #ffb700; }
@@ -28,11 +25,7 @@ body {
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-hr {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 2rem 0;
-}
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 
 /* ── Item ──────────────────────────────────────────── */
 .item {
@@ -45,22 +38,19 @@ hr {
   transition: border-left-color 0.1s;
 }
 .item:last-child { border-bottom: none; }
-.item:hover { border-left-color: var(--dim); }
+.item:hover { border-left-color: var(--fg); }
 
-.item-meta  { color: var(--dim); margin-bottom: 0.15rem; }
-.item-title { color: var(--title); font-weight: 600; }
-.item-desc  { color: #484848; margin-top: 0.15rem; }
+.item-meta  { margin-bottom: 0.15rem; opacity: 0.4; }
+.item-title { font-weight: 600; }
+.item-desc  { margin-top: 0.15rem; opacity: 0.5; }
 .item-new   { color: var(--accent); font-weight: normal; opacity: 0.6; margin-left: 0.3rem; }
-.item:hover .item-title { color: #f0f0f0; }
-.item:hover .item-desc  { color: #585858; }
 
 /* ── Section label ─────────────────────────────────── */
 .section-label {
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--dim);
+  opacity: 0.35;
   padding-bottom: 0.25rem;
-  margin-bottom: 0;
 }
 
 /* ── Search ────────────────────────────────────────── */
@@ -70,22 +60,24 @@ hr {
   border-bottom: 1px solid transparent;
   outline: none;
   font: inherit;
-  color: var(--dim);
+  color: var(--fg);
+  opacity: 0.4;
   width: 12rem;
   padding: 0 0 0.1rem;
   caret-color: var(--accent);
-  transition: border-color 0.15s;
+  transition: opacity 0.15s, border-color 0.15s;
 }
-.search-input::placeholder { color: #252525; }
-.search-input:focus { border-bottom-color: var(--dim); }
+.search-input::placeholder { opacity: 0.4; }
+.search-input:focus { opacity: 1; border-bottom-color: var(--fg); }
 
 /* ── Theme button ──────────────────────────────────── */
 .theme-btn {
   background: none; border: none; cursor: pointer;
-  font: inherit; padding: 0; margin-right: 0.75rem; color: #2a2a2a;
+  font: inherit; padding: 0; margin-right: 0.75rem;
+  color: var(--fg); opacity: 0.2;
 }
-.theme-btn.active { color: var(--accent); }
-.theme-btn:hover  { color: var(--dim); }
+.theme-btn.active { opacity: 1; color: var(--accent); }
+.theme-btn:hover  { opacity: 0.6; }
 
 /* ── Cursor ────────────────────────────────────────── */
 @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }

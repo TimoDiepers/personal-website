@@ -137,15 +137,15 @@ export default function Home() {
 
       {/* Header */}
       <header style={{ marginBottom: '2.5rem' }}>
-        <div style={{ color: '#e8e8e8', fontWeight: 600, marginBottom: '0.2rem' }}>Timo Diepers</div>
-        <div style={{ color: '#444', marginBottom: '1rem' }}>Research Associate · RWTH Aachen University</div>
-        <p style={{ color: '#555', maxWidth: '50ch', margin: '0 0 1rem' }}>
+        <div style={{ fontWeight: 600, marginBottom: '0.2rem' }}>Timo Diepers</div>
+        <div style={{ opacity: 0.5, marginBottom: '1rem' }}>Research Associate · RWTH Aachen University</div>
+        <p style={{ opacity: 0.5, maxWidth: '50ch', margin: '0 0 1rem' }}>
           I explore methods for designing sustainable processes and systems through
           Life Cycle Assessment and Mathematical Optimization.
         </p>
-        <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', opacity: 0.5 }}>
           {SOCIAL.map(({ label, href }) => (
-            <a key={label} href={href} style={{ color: '#555' }}
+            <a key={label} href={href} style={{ color: 'inherit' }}
                target={label === 'email' ? undefined : '_blank'}
                rel={label === 'email' ? undefined : 'noopener noreferrer'}>
               {label}
@@ -175,8 +175,8 @@ export default function Home() {
             placeholder="search  ·  / to focus" spellCheck={false} />
           {filtering && (
             <>
-              <button onClick={() => setQuery('')} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', font: 'inherit', padding: 0 }}>×</button>
-              <span style={{ color: '#333' }}>{total}</span>
+              <button onClick={() => setQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: 0, opacity: 0.5 }}>×</button>
+              <span style={{ opacity: 0.4 }}>{total}</span>
             </>
           )}
         </div>
