@@ -11,7 +11,7 @@ const getYear = (item: ContentItem) => {
     return '—';
   }
 
-  const match = item.meta.match(/(19|20)\d{2}/g);
+  const match = item.meta.match(/\b\d{4}\b/g);
   return match?.at(-1) ?? '—';
 };
 
@@ -62,12 +62,21 @@ const OverviewSection = ({
           }
 
           const primaryLink = item.links[0];
+
+          if (!primaryLink) {
+            return (
+              <li key={item.id}>
+                <div className="block border border-foreground px-3 py-2">{body}</div>
+              </li>
+            );
+          }
+
           return (
             <li key={item.id}>
               <a
-                href={primaryLink?.href ?? '#'}
-                target={primaryLink ? '_blank' : undefined}
-                rel={primaryLink ? 'noopener noreferrer' : undefined}
+                href={primaryLink.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block border border-foreground px-3 py-2 hover:bg-foreground hover:text-background"
               >
                 {body}
