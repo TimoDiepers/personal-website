@@ -29,7 +29,7 @@ const OverviewSection = ({
 }) => {
   return (
     <section aria-labelledby={id} className="space-y-3">
-      <h2 id={id} className="border-b border-foreground pb-1 text-sm uppercase tracking-[0.2em]">
+      <h2 id={id} className="border-b border-foreground pb-1 text-sm lowercase tracking-[0.2em]">
         {title}
       </h2>
       <ul className="space-y-2">
@@ -130,7 +130,7 @@ const HomeOverview = () => {
           aria-label="Topic filters"
           className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pt-8 text-sm"
         >
-          <span className="text-sm">Filter contents:</span>
+          <span className="text-sm">Filter:</span>
           <button
             type="button"
             onClick={() => setActiveTopics([])}

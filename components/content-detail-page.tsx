@@ -18,7 +18,7 @@ const ContentDetailPage = ({ item }: ContentDetailPageProps) => {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-8 px-6 py-10 text-sm">
       <div className="flex items-center justify-between gap-3">
-        <Link href="/" className="text-sm underline">
+        <Link href="/" className="text-sm !underline">
           Back to overview
         </Link>
         <ThemeToggle size="sm" className="opacity-55" />
