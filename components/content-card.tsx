@@ -82,12 +82,12 @@ const ContentCard = ({
         ) : null}
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold leading-snug transition-colors duration-200 group-hover:text-primary sm:text-xl">
+            <h3 className="text-sm font-semibold leading-snug transition-colors duration-200 group-hover:text-primary">
               {item.title}
             </h3>
-            {item.meta ? (
-              <p className="text-xs uppercase tracking-wide text-muted-foreground pt-2">
-                {item.meta}
+            {item.type ? (
+              <p className="pt-2 text-sm text-muted-foreground">
+                {item.type}
               </p>
             ) : null}
           </div>
@@ -95,7 +95,7 @@ const ContentCard = ({
             {item.topics.map((topic) => (
               <span
                 key={topic}
-                className="rounded-full bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                className="rounded-full bg-background px-2.5 py-1 text-sm font-medium text-muted-foreground"
               >
                 {topic}
               </span>

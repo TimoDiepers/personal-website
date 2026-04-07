@@ -3,8 +3,8 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import ThemeToggle from '@/components/theme-toggle';
 import ContentCard from '@/components/content-card';
+import ThemeToggle from '@/components/theme-toggle';
 import type { ContentItem } from '@/lib/content';
 
 const sortTopics = (topics: string[]) =>
@@ -49,23 +49,23 @@ const ContentCollection = ({
   }, [items, activeTopics]);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-20 pt-12 sm:px-6 lg:px-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-20 pt-12 text-sm sm:px-6 lg:px-8">
       <header className="space-y-6">
         <div className="flex items-center justify-between gap-3">
           <Link
             href={backHref}
-            className="group inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all duration-300 hover:-translate-x-1 hover:text-primary/85"
+            className="group inline-flex items-center gap-1 text-sm font-semibold text-primary transition-colors duration-300 hover:text-primary/85 hover:underline hover:underline-offset-4"
           >
-            <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" aria-hidden="true" />
+            <ArrowLeft className="h-4 w-4 transition-opacity duration-300 group-hover:opacity-80" aria-hidden="true" />
             Back to overview
           </Link>
-          <ThemeToggle className="ml-auto" />
+          <ThemeToggle size="sm" className="opacity-55" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="text-sm font-bold uppercase tracking-wide">
             {title}
           </h1>
-          <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+          <p className="max-w-2xl text-sm text-muted-foreground">
             {intro}
           </p>
         </div>
@@ -79,15 +79,14 @@ const ContentCollection = ({
                     key={topic}
                     type="button"
                     onClick={() => toggleTopic(topic)}
-                    className="relative inline-flex items-center rounded-full bg-card px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-300 hover:cursor-pointer hover:bg-primary/5 dark:hover:bg-primary/15"
+                    className={`cursor-pointer px-1 py-0.5 transition-opacity duration-150 ${
+                      isActive
+                        ? 'font-medium underline underline-offset-4 decoration-1 text-foreground'
+                        : 'opacity-70 hover:opacity-100 text-muted-foreground'
+                    }`}
                     aria-pressed={isActive}
                   >
-                    {isActive ? (
-                      <span className="absolute inset-0 rounded-full text-foreground bg-primary/15 dark:bg-primary/25" />
-                    ) : null}
-                    <span className="relative z-10 text-xs font-sm text-muted-foreground">
-                      {topic}
-                    </span>
+                    [{topic.toLowerCase()}]
                   </button>
                 );
               })}
@@ -96,9 +95,9 @@ const ContentCollection = ({
               <button
                 type="button"
                 onClick={() => setActiveTopics([])}
-                className="ml-auto inline-flex items-center bg-card uppercase rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide text-primary dark:text-primary/70 transition-colors duration-300 hover:bg-primary/5 dark:hover:bg-primary/15 hover:cursor-pointer"
+                className="ml-auto cursor-pointer px-1 py-0.5 text-sm opacity-70 transition-opacity duration-150 hover:opacity-100"
               >
-                Clear Filters
+                clear filters
               </button>
             ) : null}
           </div>

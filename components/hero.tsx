@@ -20,6 +20,7 @@ const MotionHeroSubcopy = motion.create('p');
 const MotionHeroImageShell = motion.create('div');
 const MotionHeroFrame = motion.create('div');
 const MotionHeroActions = motion.create('div');
+const MotionHeroThemeToggle = motion.create('div');
 
 
 const Hero = ({ onReady, onExploreClick, onContactClick }: HeroProps) => {
@@ -52,12 +53,14 @@ const Hero = ({ onReady, onExploreClick, onContactClick }: HeroProps) => {
           />
         </MotionBackground> */}
 
-        <ThemeToggle
+        <MotionHeroThemeToggle
           initial={{ opacity: 0, scale: 0.9, y: -6 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut', delay: 0.15 }}
           className="absolute right-0 top-0 z-30"
-        />
+        >
+          <ThemeToggle />
+        </MotionHeroThemeToggle>
 
         <div className="relative z-10 grid gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] md:items-center">
           <MotionHeroImageShell
