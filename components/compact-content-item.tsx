@@ -39,9 +39,9 @@ const CompactContentItem: React.FC<CompactContentItemProps> = ({
             <h4 className="text-sm font-medium leading-tight line-clamp-2 group-hover:text-primary transition-colors">
               {item.title}
             </h4>
-            {item.meta && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {item.meta}
+            {item.type && (
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {item.type}
               </p>
             )}
           </div>
@@ -65,13 +65,13 @@ const CompactContentItem: React.FC<CompactContentItemProps> = ({
           {item.topics.slice(0, 3).map((topic) => (
             <span
               key={topic}
-              className="inline-flex items-center rounded-full bg-background/80 px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+              className="inline-flex items-center rounded-full bg-background/80 px-1.5 py-0.5 text-sm font-medium text-muted-foreground"
             >
               {topic}
             </span>
           ))}
           {item.topics.length > 3 && (
-            <span className="inline-flex items-center rounded-full bg-background/80 px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center rounded-full bg-background/80 px-1.5 py-0.5 text-sm font-medium text-muted-foreground">
               +{item.topics.length - 3}
             </span>
           )}

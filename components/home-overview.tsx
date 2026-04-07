@@ -3,8 +3,9 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 
+import ThemeToggle from '@/components/theme-toggle';
 import { codingProjects, presentations, publications, type ContentItem } from '@/lib/content';
-import { getItemProseLabel, getItemYear, orderByDateDesc } from '@/lib/content-helpers';
+import { getItemType, getItemYear, orderByDateDesc } from '@/lib/content-helpers';
 
 const socialLinks = [
   { href: 'mailto:timo.diepers@rwth-aachen.de', label: 'Mail' },
@@ -17,13 +18,13 @@ const OverviewSection = ({
   id,
   title,
   items,
-  fallbackLabel,
+  fallbackType,
   detailPath,
 }: {
   id: string;
   title: string;
   items: ContentItem[];
-  fallbackLabel: string;
+  fallbackType: string;
   detailPath?: string;
 }) => {
   return (
@@ -35,9 +36,9 @@ const OverviewSection = ({
         {orderByDateDesc(items).map((item) => {
           const body = (
             <>
-              <p>{item.title}</p>
-              <p className="text-xs">
-                {getItemYear(item)} · {getItemProseLabel(item, fallbackLabel)}
+              <p className="font-bold">{item.title}</p>
+              <p className="text-sm">
+                {getItemYear(item)} · {getItemType(item, fallbackType)}
               </p>
             </>
           );
@@ -47,7 +48,7 @@ const OverviewSection = ({
               <li key={item.id}>
                 <Link
                   href={`${detailPath}/${item.id}`}
-                  className="block border border-foreground px-3 py-2 hover:bg-foreground hover:text-background"
+                  className="block border border-foreground px-3 py-2 transition-colors duration-150 hover:bg-foreground hover:text-background hover:ring-1 hover:ring-foreground/60"
                 >
                   {body}
                 </Link>
@@ -71,7 +72,7 @@ const OverviewSection = ({
                 href={primaryLink.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block border border-foreground px-3 py-2 hover:bg-foreground hover:text-background"
+                className="block border border-foreground px-3 py-2 transition-colors duration-150 hover:bg-foreground hover:text-background hover:ring-1 hover:ring-foreground/60"
               >
                 {body}
               </a>
@@ -106,7 +107,7 @@ const HomeOverview = () => {
     () => getFilteredItems(presentations, activeTopics),
     [activeTopics],
   );
-  const filteredProjects = useMemo(
+  const filteredCoding = useMemo(
     () => getFilteredItems(codingProjects, activeTopics),
     [activeTopics],
   );
@@ -118,20 +119,26 @@ const HomeOverview = () => {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-10 px-6 py-10">
+    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-10 px-6 py-10 text-sm">
       <header className="space-y-2">
-        <h1 className="text-2xl">Timo Diepers</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-sm font-bold">Timo Diepers</h1>
+          <ThemeToggle size="sm" className="opacity-55" />
+        </div>
         <p className="text-sm">Overview / research notes / software</p>
-        <nav aria-label="Topic filters" className="flex flex-wrap gap-2 pt-1 text-xs">
+        <nav aria-label="Topic filters" className="flex flex-wrap items-center gap-2 pt-8 text-sm">
+          <span className="text-sm">Filter contents:</span>
           <button
             type="button"
             onClick={() => setActiveTopics([])}
             aria-pressed={activeTopics.length === 0}
-            className={`border border-foreground px-2 py-1 hover:bg-foreground hover:text-background ${
-              activeTopics.length === 0 ? 'bg-foreground text-background ring-1 ring-foreground ring-offset-1' : ''
+            className={`cursor-pointer px-1 py-0.5 transition-opacity duration-150 ${
+              activeTopics.length === 0
+                ? 'font-medium underline underline-offset-4 decoration-1'
+                : 'opacity-70 hover:opacity-100'
             }`}
           >
-            All
+            all
           </button>
           {allTopics.map((filterTopic) => {
             const isActive = activeTopics.includes(filterTopic);
@@ -142,13 +149,13 @@ const HomeOverview = () => {
                 key={filterTopic}
                 onClick={() => toggleTopic(filterTopic)}
                 aria-pressed={isActive}
-                className={`border px-2 py-1 hover:bg-foreground hover:text-background ${
+                className={`cursor-pointer px-1 py-0.5 transition-opacity duration-150 ${
                   isActive
-                    ? 'border-foreground bg-foreground text-background ring-1 ring-foreground ring-offset-1'
-                    : 'border-foreground'
+                    ? 'font-medium underline underline-offset-4 decoration-1'
+                    : 'opacity-70 hover:opacity-100'
                 }`}
               >
-                {filterTopic}
+                [{filterTopic.toLowerCase()}]
               </button>
             );
           })}
@@ -159,27 +166,27 @@ const HomeOverview = () => {
         id="publications-heading"
         title="Publications"
         items={filteredPublications}
-        fallbackLabel="publication"
+        fallbackType="Publication"
         detailPath="/publications"
       />
 
       <OverviewSection
         id="presentations-heading"
-        title="Talks"
+        title="Presentations"
         items={filteredPresentations}
-        fallbackLabel="talk"
-        detailPath="/talks"
+        fallbackType="Presentation"
+        detailPath="/presentations"
       />
 
       <OverviewSection
-        id="projects-heading"
-        title="Projects"
-        items={filteredProjects}
-        fallbackLabel="project"
-        detailPath="/projects"
+        id="coding-heading"
+        title="Coding"
+        items={filteredCoding}
+        fallbackType="Coding"
+        detailPath="/coding"
       />
 
-      <footer className="border-t border-foreground pt-4 text-xs">
+      <footer className="border-t border-foreground pt-4 text-sm">
         <nav aria-label="Social links" className="flex flex-wrap gap-2">
           {socialLinks.map((link) => (
             <a

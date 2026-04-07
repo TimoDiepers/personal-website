@@ -31,6 +31,25 @@ const persistTheme = (value: Theme) => {
   window.localStorage.setItem(STORAGE_KEY, value);
 };
 
+const suppressTransitions = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const style = document.createElement('style');
+  style.appendChild(document.createTextNode('* { transition: none !important; }'));
+  document.head.appendChild(style);
+
+  // Force style recalculation so transition suppression applies immediately.
+  window.getComputedStyle(document.body);
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      document.head.removeChild(style);
+    });
+  });
+};
+
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setThemeState] = useState<Theme>('light');
   const [ready, setReady] = useState(false);
@@ -77,6 +96,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   }, [ready, hasStoredPreference]);
 
   const setTheme = useCallback((value: Theme) => {
+    suppressTransitions();
     setThemeState(value);
     if (typeof window !== 'undefined') {
       persistTheme(value);
@@ -86,6 +106,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const toggleTheme = useCallback(() => {
+    suppressTransitions();
     setThemeState((current) => {
       const next = current === 'dark' ? 'light' : 'dark';
       if (typeof window !== 'undefined') {
@@ -101,6 +122,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window === 'undefined') {
       return;
     }
+    suppressTransitions();
     window.localStorage.removeItem(STORAGE_KEY);
     setThemeState(getSystemTheme());
     setHasStoredPreference(false);

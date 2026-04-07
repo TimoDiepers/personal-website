@@ -1,20 +1,11 @@
 import type { ContentItem } from '@/lib/content';
 
 export const getItemYear = (item: ContentItem) => {
-  if (item.year) {
-    return item.year;
-  }
-
-  if (!item.meta) {
-    return '—';
-  }
-
-  const matches = item.meta.match(/\b(19\d{2}|2[01]\d{2})\b/g);
-  return matches?.at(-1) ?? '—';
+  return item.year ?? '—';
 };
 
-export const getItemProseLabel = (item: ContentItem, fallback: string) => {
-  return item.proseLabel ?? item.topics?.[0]?.toLowerCase() ?? fallback;
+export const getItemType = (item: ContentItem, fallback: string) => {
+  return item.type ?? fallback;
 };
 
 export const getItemYearValue = (item: ContentItem) => {
