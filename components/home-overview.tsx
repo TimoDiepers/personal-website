@@ -126,7 +126,10 @@ const HomeOverview = () => {
           <ThemeToggle size="sm" className="opacity-55" />
         </div>
         <p className="text-sm">Overview / research notes / software</p>
-        <nav aria-label="Topic filters" className="flex flex-wrap items-center gap-2 pt-8 text-sm">
+        <nav
+          aria-label="Topic filters"
+          className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pt-8 text-sm"
+        >
           <span className="text-sm">Filter contents:</span>
           <button
             type="button"
