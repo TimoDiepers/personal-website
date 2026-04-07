@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import ThemeToggle from '@/components/theme-toggle';
 import { codingProjects, presentations, publications, type ContentItem } from '@/lib/content';
@@ -48,6 +49,7 @@ const OverviewSection = ({
               <li key={item.id}>
                 <Link
                   href={`${detailPath}/${item.id}`}
+                  prefetch
                   className="block border border-foreground px-3 py-2 transition-colors duration-150 hover:bg-foreground hover:text-background hover:ring-1 hover:ring-foreground/60"
                 >
                   {body}
@@ -97,7 +99,37 @@ const allTopics = Array.from(
 ).sort((a, b) => a.localeCompare(b));
 
 const HomeOverview = () => {
+  const router = useRouter();
   const [activeTopics, setActiveTopics] = useState<string[]>([]);
+
+  useEffect(() => {
+    const routes = [
+      ...publications.map((item) => `/publications/${item.id}`),
+      ...presentations.map((item) => `/presentations/${item.id}`),
+      ...codingProjects.map((item) => `/coding/${item.id}`),
+    ];
+
+    const prefetchRoutes = () => {
+      routes.forEach((route) => router.prefetch(route));
+    };
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const win = window as Window & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    if (win.requestIdleCallback && win.cancelIdleCallback) {
+      const idleHandle = win.requestIdleCallback(prefetchRoutes, { timeout: 1500 });
+      return () => win.cancelIdleCallback?.(idleHandle);
+    }
+
+    const timeoutHandle = globalThis.setTimeout(prefetchRoutes, 250);
+    return () => globalThis.clearTimeout(timeoutHandle);
+  }, [router]);
 
   const filteredPublications = useMemo(
     () => getFilteredItems(publications, activeTopics),

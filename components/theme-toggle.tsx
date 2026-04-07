@@ -1,6 +1,6 @@
 'use client';
 
-import { useTheme } from '@/components/theme-provider';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 type ThemeToggleProps = {
@@ -12,7 +12,22 @@ const ThemeToggle = ({
   className,
   size = 'md',
 }: ThemeToggleProps) => {
-  const { theme, setTheme, ready } = useTheme();
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const isDark = root.classList.contains('dark');
+    setTheme(isDark ? 'dark' : 'light');
+    setReady(true);
+  }, []);
+
+  const applyTheme = (value: 'light' | 'dark') => {
+    document.documentElement.classList.toggle('dark', value === 'dark');
+    window.localStorage.setItem('theme-preference', value);
+    setTheme(value);
+  };
+
   const dimensions = size === 'sm' ? 'h-7 px-1 text-sm' : 'h-8 px-1.5 text-sm';
 
   const options: Array<{ value: 'light' | 'dark'; label: 'light' | 'dark' }> = [
@@ -42,7 +57,7 @@ const ThemeToggle = ({
             role="radio"
             aria-checked={isActive}
             disabled={!ready}
-            onClick={() => setTheme(option.value)}
+            onClick={() => applyTheme(option.value)}
             className={cn(
               'inline-flex cursor-pointer select-none items-center px-1 py-0.5 leading-none rounded-sm transition-colors duration-150',
               isActive
