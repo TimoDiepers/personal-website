@@ -40,7 +40,7 @@ const ThemeToggle = ({
       role="radiogroup"
       aria-label="Theme selector"
       className={cn(
-        'inline-flex items-center gap-1 text-foreground/60 transition-colors duration-200',
+        'inline-flex items-center gap-1 text-foreground/60',
         !ready && 'cursor-not-allowed opacity-70',
         dimensions,
         className,
@@ -59,10 +59,10 @@ const ThemeToggle = ({
             disabled={!ready}
             onClick={() => applyTheme(option.value)}
             className={cn(
-              'inline-flex cursor-pointer select-none items-center px-1 py-0.5 leading-none rounded-sm transition-colors duration-150',
+              'inline-flex cursor-pointer select-none items-center px-1 py-0.5 leading-none',
               isActive
-                ? 'text-foreground/80 font-normal underline underline-offset-4 decoration-foreground/40 decoration-1'
-                : 'text-foreground/50 hover:opacity-80',
+                ? 'text-foreground/80 opacity-100 font-normal underline underline-offset-4 decoration-foreground/40 decoration-1'
+                : 'text-foreground/50 opacity-70 hover:opacity-100',
               'disabled:cursor-not-allowed',
             )}
           >

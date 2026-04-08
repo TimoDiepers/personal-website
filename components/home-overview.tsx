@@ -50,7 +50,7 @@ const OverviewSection = ({
                 <Link
                   href={`${detailPath}/${item.id}`}
                   prefetch
-                  className="block border border-foreground px-3 py-2 transition-colors duration-150 hover:bg-foreground hover:text-background hover:ring-1 hover:ring-foreground/60"
+                  className="block border border-foreground px-3 py-2 hover:bg-foreground hover:text-background hover:ring-1 hover:ring-foreground/60"
                 >
                   {body}
                 </Link>
@@ -74,7 +74,7 @@ const OverviewSection = ({
                 href={primaryLink.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block border border-foreground px-3 py-2 transition-colors duration-150 hover:bg-foreground hover:text-background hover:ring-1 hover:ring-foreground/60"
+                className="block border border-foreground px-3 py-2 hover:bg-foreground hover:text-background hover:ring-1 hover:ring-foreground/60"
               >
                 {body}
               </a>
@@ -155,7 +155,7 @@ const HomeOverview = () => {
       <header className="space-y-2">
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-sm font-bold">Timo Diepers</h1>
-          <ThemeToggle size="sm" className="opacity-55" />
+          <ThemeToggle size="sm" />
         </div>
         <p className="text-sm">Overview / research notes / software</p>
         <nav
