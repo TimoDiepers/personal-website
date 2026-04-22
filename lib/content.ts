@@ -47,17 +47,17 @@ export const publications: ContentItem[] = [
   },  
   {
     id: 'timex-joss-paper',
-    title: 'bw_timex: A Python Package for Time-explicit Life Cycle Assessment (submitted)',
-    type: 'Software Paper',
+    title: 'bw_timex: A Python Package for Time-explicit Life Cycle Assessment',
+    type: 'Journal Paper',
     description:
       'We propose a time-explicit LCA framework that captures when processes and emissions occur, enabling dynamic assessments of evolving product systems.',
     topics: ['Journal Paper', 'Life Cycle Assessment'],
     links: [
-      { label: 'Preprint', href: 'https://github.com/openjournals/joss-papers/blob/joss.07981/joss.07981/10.21105.joss.07981.pdf' },
+      { label: 'Paper', href: 'https://joss.theoj.org/papers/10.21105/joss.09621' },
       { label: 'Package', href: 'https://github.com/brightway-lca/bw_timex?tab=readme-ov-file' },
     ],
     featured: false,
-    year: '2025',
+    year: '2026',
   },
 ];
 
