@@ -33,6 +33,20 @@ export const publications: ContentItem[] = [
     year: '2025',
   },
   {
+    id: 'optimex-paper',
+    title: 'A Framework for Time-Explicit Life Cycle Optimization',
+    type: 'Journal Paper - Preprint',
+    description:
+      'We propose a time-explicit LCO framework that captures when processes and emissions occur, enabling transition pathway optimization of evolving product systems.',
+    topics: ['Journal Paper', 'Life Cycle Assessment', 'Time Dynamics', 'Optimization'],
+    links: [
+      { label: 'Paper', href: 'https://www.researchsquare.com/article/rs-9630408/v1' },
+      { label: 'Code', href: 'https://github.com/RWTH-LTT/optimex/blob/main/notebooks/methanol_and_iron.ipynb' },
+    ],
+    featured: true,
+    year: '2026',
+  },
+  {
     id: 'welding',
     title: 'DVS Focus Report: Sustainability in Welding Manufacturing',
     type: 'Focus Report',
