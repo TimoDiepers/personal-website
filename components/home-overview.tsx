@@ -86,7 +86,7 @@ const OverviewSection = ({
   );
 };
 
-type ItemWithPath = ContentItem & { detailPath: string };
+type ItemWithPath = ContentItem & { detailPath: string; fallbackType: string };
 
 const getFilteredItems = (items: ContentItem[], activeTopics: string[]) => {
   if (activeTopics.length === 0) {
@@ -166,9 +166,9 @@ const HomeOverview = () => {
 
   const yearGroups = useMemo(() => {
     const allFiltered: ItemWithPath[] = [
-      ...filteredPublications.map((item) => ({ ...item, detailPath: '/publications' })),
-      ...filteredPresentations.map((item) => ({ ...item, detailPath: '/presentations' })),
-      ...filteredCoding.map((item) => ({ ...item, detailPath: '/coding' })),
+      ...filteredPublications.map((item) => ({ ...item, detailPath: '/publications', fallbackType: 'Publication' })),
+      ...filteredPresentations.map((item) => ({ ...item, detailPath: '/presentations', fallbackType: 'Presentation' })),
+      ...filteredCoding.map((item) => ({ ...item, detailPath: '/coding', fallbackType: 'Coding' })),
     ];
     return groupByYear(allFiltered);
   }, [filteredPublications, filteredPresentations, filteredCoding]);
@@ -300,7 +300,7 @@ const HomeOverview = () => {
                       className="block border border-foreground px-3 py-2 hover:bg-foreground hover:text-background hover:ring-1 hover:ring-foreground/60"
                     >
                       <p className="font-bold">{item.title}</p>
-                      <p className="text-sm">{getItemType(item, item.detailPath.replace('/', ''))}</p>
+                      <p className="text-sm">{getItemType(item, item.fallbackType)}</p>
                     </Link>
                   </li>
                 ))}
