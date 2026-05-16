@@ -155,7 +155,7 @@ export const presentations: ContentItem[] = [
     description: "Poster presenting time-explicit life cycle optimization for transition pathways and its open-source implementation in the optimex Python package.",
     topics: ["Poster Presentation", "Life Cycle Assessment", "Optimization"],
     links: [
-      { label: "Poster", href: "https://zenodo.org/records/20156267/files/Poster_optimex.pdf" },
+      { label: "Poster", href: "https://zenodo.org/records/20156267/files/Poster_optimex.pdf?download=0" },
       { label: "Zenodo", href: "https://zenodo.org/records/20156267" },
     ],
     featured: false,
