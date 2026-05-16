@@ -86,12 +86,31 @@ const OverviewSection = ({
   );
 };
 
+type ItemWithPath = ContentItem & { detailPath: string };
+
 const getFilteredItems = (items: ContentItem[], activeTopics: string[]) => {
   if (activeTopics.length === 0) {
     return items;
   }
 
   return items.filter((item) => activeTopics.some((topic) => item.topics.includes(topic)));
+};
+
+const groupByYear = (items: ItemWithPath[]): { year: string; items: ItemWithPath[] }[] => {
+  const map = new Map<string, ItemWithPath[]>();
+  for (const item of items) {
+    const year = getItemYear(item);
+    const bucket = map.get(year) ?? [];
+    bucket.push(item);
+    map.set(year, bucket);
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => {
+      const aVal = a === '—' ? Number.NEGATIVE_INFINITY : Number(a);
+      const bVal = b === '—' ? Number.NEGATIVE_INFINITY : Number(b);
+      return bVal - aVal;
+    })
+    .map(([year, items]) => ({ year, items }));
 };
 
 const allTopics = Array.from(
@@ -101,6 +120,7 @@ const allTopics = Array.from(
 const HomeOverview = () => {
   const router = useRouter();
   const [activeTopics, setActiveTopics] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'type' | 'year'>('type');
 
   useEffect(() => {
     const routes = [
@@ -144,6 +164,15 @@ const HomeOverview = () => {
     [activeTopics],
   );
 
+  const yearGroups = useMemo(() => {
+    const allFiltered: ItemWithPath[] = [
+      ...filteredPublications.map((item) => ({ ...item, detailPath: '/publications' })),
+      ...filteredPresentations.map((item) => ({ ...item, detailPath: '/presentations' })),
+      ...filteredCoding.map((item) => ({ ...item, detailPath: '/coding' })),
+    ];
+    return groupByYear(allFiltered);
+  }, [filteredPublications, filteredPresentations, filteredCoding]);
+
   const toggleTopic = (topic: string) => {
     setActiveTopics((current) =>
       current.includes(topic) ? current.filter((activeTopic) => activeTopic !== topic) : [...current, topic],
@@ -158,68 +187,131 @@ const HomeOverview = () => {
           <ThemeToggle size="sm" />
         </div>
         <p className="text-sm">Overview / research notes / software</p>
-        <nav
-          aria-label="Topic filters"
-          className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pt-8 text-sm"
-        >
-          <span className="text-sm">Filter:</span>
-          <button
-            type="button"
-            onClick={() => setActiveTopics([])}
-            aria-pressed={activeTopics.length === 0}
-            className={`cursor-pointer px-1 py-0.5 transition-opacity duration-150 ${
-              activeTopics.length === 0
-                ? 'font-medium underline underline-offset-4 decoration-1'
-                : 'opacity-70 hover:opacity-100'
-            }`}
+        <div className="flex flex-wrap items-start justify-between gap-4 pt-8">
+          <nav
+            aria-label="Topic filters"
+            className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm"
           >
-            all
-          </button>
-          {allTopics.map((filterTopic) => {
-            const isActive = activeTopics.includes(filterTopic);
+            <span className="text-sm">Filter:</span>
+            <button
+              type="button"
+              onClick={() => setActiveTopics([])}
+              aria-pressed={activeTopics.length === 0}
+              className={`cursor-pointer px-1 py-0.5 transition-opacity duration-150 ${
+                activeTopics.length === 0
+                  ? 'font-medium underline underline-offset-4 decoration-1'
+                  : 'opacity-70 hover:opacity-100'
+              }`}
+            >
+              all
+            </button>
+            {allTopics.map((filterTopic) => {
+              const isActive = activeTopics.includes(filterTopic);
 
-            return (
-              <button
-                type="button"
-                key={filterTopic}
-                onClick={() => toggleTopic(filterTopic)}
-                aria-pressed={isActive}
-                className={`cursor-pointer px-1 py-0.5 transition-opacity duration-150 ${
-                  isActive
-                    ? 'font-medium underline underline-offset-4 decoration-1'
-                    : 'opacity-70 hover:opacity-100'
-                }`}
-              >
-                [{filterTopic.toLowerCase()}]
-              </button>
-            );
-          })}
-        </nav>
+              return (
+                <button
+                  type="button"
+                  key={filterTopic}
+                  onClick={() => toggleTopic(filterTopic)}
+                  aria-pressed={isActive}
+                  className={`cursor-pointer px-1 py-0.5 transition-opacity duration-150 ${
+                    isActive
+                      ? 'font-medium underline underline-offset-4 decoration-1'
+                      : 'opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  [{filterTopic.toLowerCase()}]
+                </button>
+              );
+            })}
+          </nav>
+          <nav aria-label="View mode" className="flex items-center gap-2 text-sm">
+            <span className="opacity-70">Group by:</span>
+            <button
+              type="button"
+              onClick={() => setViewMode('type')}
+              aria-pressed={viewMode === 'type'}
+              className={`cursor-pointer px-1 py-0.5 transition-opacity duration-150 ${
+                viewMode === 'type'
+                  ? 'font-medium underline underline-offset-4 decoration-1'
+                  : 'opacity-70 hover:opacity-100'
+              }`}
+            >
+              type
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('year')}
+              aria-pressed={viewMode === 'year'}
+              className={`cursor-pointer px-1 py-0.5 transition-opacity duration-150 ${
+                viewMode === 'year'
+                  ? 'font-medium underline underline-offset-4 decoration-1'
+                  : 'opacity-70 hover:opacity-100'
+              }`}
+            >
+              year
+            </button>
+          </nav>
+        </div>
       </header>
 
-      <OverviewSection
-        id="publications-heading"
-        title="Publications"
-        items={filteredPublications}
-        fallbackType="Publication"
-        detailPath="/publications"
-      />
+      {viewMode === 'type' ? (
+        <>
+          <OverviewSection
+            id="publications-heading"
+            title="Publications"
+            items={filteredPublications}
+            fallbackType="Publication"
+            detailPath="/publications"
+          />
 
-      <OverviewSection
-        id="presentations-heading"
-        title="Presentations"
-        items={filteredPresentations}
-        fallbackType="Presentation"
-        detailPath="/presentations"
-      />
+          <OverviewSection
+            id="presentations-heading"
+            title="Presentations"
+            items={filteredPresentations}
+            fallbackType="Presentation"
+            detailPath="/presentations"
+          />
 
-      <OverviewSection
-        id="coding-heading"
-        title="Coding"
-        items={filteredCoding}
-        fallbackType="Coding"
-        detailPath="/coding"
-      />
+          <OverviewSection
+            id="coding-heading"
+            title="Coding"
+            items={filteredCoding}
+            fallbackType="Coding"
+            detailPath="/coding"
+          />
+        </>
+      ) : (
+        <>
+          {yearGroups.map(({ year, items: yearItems }) => (
+            <section key={year} aria-labelledby={`year-${year}-heading`} className="space-y-3">
+              <h2
+                id={`year-${year}-heading`}
+                className="border-b border-foreground pb-1 text-sm lowercase tracking-[0.2em]"
+              >
+                {year}
+              </h2>
+              <ul className="space-y-2">
+                {yearItems.map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href={`${item.detailPath}/${item.id}`}
+                      prefetch
+                      className="block border border-foreground px-3 py-2 hover:bg-foreground hover:text-background hover:ring-1 hover:ring-foreground/60"
+                    >
+                      <p className="font-bold">{item.title}</p>
+                      <p className="text-sm">{getItemType(item, item.detailPath.replace('/', ''))}</p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+          {yearGroups.length === 0 ? (
+            <p className="text-sm opacity-70">No items match the selected filters.</p>
+          ) : null}
+        </>
+      )}
 
       <footer className="border-t border-foreground pt-4 text-sm">
         <nav aria-label="Social links" className="flex flex-wrap gap-2">
