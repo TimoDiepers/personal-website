@@ -149,6 +149,18 @@ export const presentations: ContentItem[] = [
     year: '2025',
   },
   {
+    id: "optimex-setac-2026",
+    title: "Time-explicit Life Cycle Optimization for Transition Pathways: An Open-Source Python Implementation",
+    type: "Poster Presentation · SETAC Europe 36th Annual Meeting (Maastricht, NL)",
+    description: "Poster presenting time-explicit life cycle optimization for transition pathways and its open-source implementation in the optimex Python package.",
+    topics: ["Poster Presentation", "Life Cycle Assessment", "Optimization"],
+    links: [
+      { label: "Poster", href: "https://zenodo.org/records/20156267" },
+    ],
+    featured: false,
+    year: '2026',
+  },
+  {
     id: "timex-setac",
     title: "Dynamic-Prospective Life Cycle Assessment using Time-Explicit Life Cycle Inventory: Methodology and Implementation",
     type: "Poster Presentation · SETAC Europe Annual Meeting (Seville, ES)",
