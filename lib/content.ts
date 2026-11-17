@@ -35,12 +35,13 @@ export const publications: ContentItem[] = [
   {
     id: 'optimex-paper',
     title: 'A Framework for Time-Explicit Life Cycle Optimization',
-    type: 'Journal Paper - Preprint',
+    type: 'Journal Paper',
     description:
-      'We propose a time-explicit LCO framework that captures when processes and emissions occur, enabling transition pathway optimization of evolving product systems.',
+      'We propose a time-explicit LCO framework that captures when processes and emissions occur, enabling transition pathway optimization of evolving product systems. Published in Environmental Science & Technology.',
     topics: ['Journal Paper', 'Life Cycle Assessment', 'Time Dynamics', 'Optimization'],
     links: [
-      { label: 'Paper', href: 'https://www.researchsquare.com/article/rs-9630408/v1' },
+      { label: 'Paper', href: 'https://doi.org/10.1021/acs.est.6c06868' },
+      { label: 'Preprint', href: 'https://doi.org/10.21203/rs.3.rs-9630408/v1' },
       { label: 'Code', href: 'https://github.com/RWTH-LTT/optimex/blob/main/notebooks/methanol_and_iron.ipynb' },
     ],
     featured: true,
@@ -71,6 +72,20 @@ export const publications: ContentItem[] = [
       { label: 'Package', href: 'https://github.com/brightway-lca/bw_timex?tab=readme-ov-file' },
     ],
     featured: false,
+    year: '2026',
+  },
+  {
+    id: 'grid-infrastructure-preprint',
+    title: 'Emerging Environmental Relevance of Electricity Grid Infrastructure',
+    type: 'Journal Paper - Preprint',
+    description:
+      "We combine a detailed model of Germany's grid infrastructure with Integrated Assessment Model scenarios to assess the environmental impacts of future grid expansion. Grid infrastructure becomes a major contributor to the climate impacts of future electricity, with its share rising from 1% in 2023 to up to 21% by 2045.",
+    topics: ['Journal Paper', 'Life Cycle Assessment', 'Case Study'],
+    links: [
+      { label: 'Preprint', href: 'https://doi.org/10.2139/ssrn.7612037' },
+      { label: 'Interactive Demo', href: 'https://timodiepers.github.io/grid-expansion-impacts/' },
+    ],
+    featured: true,
     year: '2026',
   },
 ];
@@ -195,7 +210,7 @@ export const codingProjects: ContentItem[] = [
     title: 'optimex  · Time-explicit Transition Pathway Optimization',
     type: 'Python Package',
     description:
-      'Opinionated infrastructure templates that standardize experiment tracking, evaluation, and rollout for ML teams.',
+      'Optimize transition pathways with time-explicit life cycle optimization, accounting for the temporal distribution and evolution of processes and supply chains.',
     topics: ['Brightway', 'Optimization'],
     links: [
       { label: 'Repository', href: 'https://github.com/TimoDiepers/optimex' },
